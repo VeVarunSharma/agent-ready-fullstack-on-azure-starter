@@ -1,0 +1,60 @@
+{
+  "name": "@repo/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#components/*": "./src/components/*.tsx",
+    "#hooks/*": "./src/hooks/*.ts",
+    "#lib/*": "./src/lib/*.ts"
+  },
+  "scripts": {
+    "dev": "NEXT_TELEMETRY_DISABLED=1 next dev",
+    "build": "NEXT_TELEMETRY_DISABLED=1 next build && node scripts/prepare-standalone.mjs",
+    "start": "NEXT_TELEMETRY_DISABLED=1 node .next/standalone/apps/web/server.js",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "test:unit": "vitest run --config vitest.config.ts",
+    "e2e": "playwright test --config playwright.config.ts",
+    "format:check": "prettier --check .",
+    "clean": "rm -rf .next .turbo playwright-report test-results tsconfig.tsbuildinfo"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "1.9.1",
+    "@orpc/client": "1.14.10",
+    "@orpc/contract": "1.14.10",
+    "@orpc/openapi": "1.14.10",
+    "@orpc/openapi-client": "1.14.10",
+    "@orpc/server": "1.14.10",
+    "@orpc/zod": "1.14.10",
+    "@repo/api-contracts": "workspace:*",
+    "@repo/db": "workspace:*",
+    "@repo/env": "workspace:*",
+    "@repo/ui": "workspace:*",
+    "next": "16.2.12",
+    "pino": "10.3.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "server-only": "0.0.1",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.12.1",
+    "@playwright/test": "1.62.0",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@tailwindcss/postcss": "4.3.3",
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/jest-dom": "7.0.0",
+    "@testing-library/react": "16.3.2",
+    "@testing-library/user-event": "14.6.1",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.4",
+    "jsdom": "29.1.1",
+    "postcss": "8.5.23",
+    "tailwindcss": "4.3.3",
+    "vite": "8.1.5"
+  }
+}

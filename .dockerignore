@@ -1,0 +1,17 @@
+.git
+.github
+.copilot
+.toolchain
+docs
+infra
+specs
+**/.next
+**/.turbo
+**/coverage
+**/node_modules
+**/playwright-report
+**/test-results
+**/*.tsbuildinfo
+*.log
+.env*
+!.env.example

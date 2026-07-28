@@ -1,0 +1,54 @@
+{
+  "name": "@repo/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": [
+    "./src/pool.ts",
+    "./src/schema/index.ts",
+    "./src/token-provider.ts"
+  ],
+  "exports": {
+    "./pool": {
+      "types": "./src/pool.ts",
+      "default": "./src/pool.ts"
+    },
+    "./schema": {
+      "types": "./src/schema/index.ts",
+      "default": "./src/schema/index.ts"
+    },
+    "./token-provider": {
+      "types": "./src/token-provider.ts",
+      "default": "./src/token-provider.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit && pnpm run build:migration",
+    "build:migration": "esbuild src/migrate-production.ts --bundle --platform=node --target=node24 --format=esm --external:pg-native --banner:js=\"import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);\" --outfile=dist/migrate-production.mjs && node scripts/verify-migration-bundle.mjs",
+    "db:generate": "drizzle-kit generate --config=drizzle.config.ts",
+    "db:migrate:local": "tsx src/migrate-local.ts",
+    "db:check": "drizzle-kit check --config=drizzle.config.ts",
+    "db:studio": "drizzle-kit studio --config=drizzle.config.ts",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "test:unit": "vitest run --config vitest.config.ts",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "format:check": "prettier --check .",
+    "clean": "rm -rf .turbo dist"
+  },
+  "dependencies": {
+    "@azure/identity": "4.13.1",
+    "@repo/env": "workspace:*",
+    "drizzle-orm": "0.45.2",
+    "pg": "8.22.0",
+    "server-only": "0.0.1"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/pg": "8.20.0",
+    "drizzle-kit": "0.31.10",
+    "esbuild": "0.28.1"
+  }
+}

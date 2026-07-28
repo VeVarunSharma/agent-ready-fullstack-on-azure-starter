@@ -1,0 +1,38 @@
+{
+  "name": "@repo/api-contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./correlation": {
+      "types": "./src/correlation.ts",
+      "default": "./src/correlation.ts"
+    },
+    "./errors": {
+      "types": "./src/errors.ts",
+      "default": "./src/errors.ts"
+    },
+    "./v1": {
+      "types": "./src/v1/index.ts",
+      "default": "./src/v1/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "test:unit": "vitest run --config vitest.config.ts",
+    "format:check": "prettier --check .",
+    "clean": "rm -rf .turbo dist"
+  },
+  "dependencies": {
+    "@orpc/contract": "1.14.10",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*"
+  }
+}

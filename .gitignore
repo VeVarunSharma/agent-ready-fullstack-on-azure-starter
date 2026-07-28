@@ -1,0 +1,34 @@
+# Dependencies and package-manager state
+node_modules/
+.pnpm-store/
+
+# Local tool bootstrap and test scratch space
+.toolchain/
+.spec-test-work/
+
+# Build and task outputs
+.next/
+.turbo/
+dist/
+build/
+out/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+
+# Local environment files; examples remain tracked
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# Logs and operating-system files
+*.log
+.DS_Store
+
+# Editor-local files
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json

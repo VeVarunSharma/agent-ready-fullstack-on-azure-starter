@@ -1,0 +1,75 @@
+name: PostgreSQL integration
+
+on:
+  pull_request:
+  push:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: integration-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: "true"
+  NEXT_TELEMETRY_DISABLED: "1"
+  TURBO_TELEMETRY_DISABLED: "1"
+  RUNTIME_MODE: test
+  DATABASE_MODE: local-password
+  DATABASE_HOST: 127.0.0.1
+  DATABASE_PORT: "5432"
+  DATABASE_NAME: foundation_local
+  DATABASE_USER: foundation_local
+  DATABASE_PASSWORD: local-only-do-not-use-in-production
+  AUTH_MODE: disabled
+  LOGGING_MODE: silent
+  TELEMETRY_MODE: disabled
+  NEXT_PUBLIC_RUNTIME_MODE: test
+
+jobs:
+  integration:
+    name: Migrate and test PostgreSQL
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:18.4-bookworm@sha256:1961f96e6029a02c3812d7cb329a3b03a3ac2bb067058dec17b0f5596aca9296
+        env:
+          POSTGRES_DB: foundation_local
+          POSTGRES_USER: foundation_local
+          POSTGRES_PASSWORD: local-only-do-not-use-in-production
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready --username=foundation_local --dbname=foundation_local"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install exact pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          version: 11.17.0
+          run_install: false
+
+      - name: Set up exact Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install frozen dependencies
+        run: pnpm install --frozen-lockfile --strict-peer-dependencies
+
+      - name: Run local migrations
+        run: pnpm db:migrate:local
+
+      - name: Run real integration suite
+        run: pnpm test:integration

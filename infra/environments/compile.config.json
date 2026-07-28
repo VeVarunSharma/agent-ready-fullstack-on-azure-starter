@@ -1,0 +1,327 @@
+{
+  "schemaVersion": 1,
+  "deploymentProfile": "compile",
+  "nonProduction": {
+    "compileOnly": true,
+    "deploymentAllowed": false
+  },
+  "dataClassification": "Restricted",
+  "workloadName": "synthetic-foundation",
+  "environmentName": "compile",
+  "primaryLocation": "test-region-1",
+  "approvedLocations": ["test-region-1"],
+  "resourceLocations": {
+    "network": "test-region-1",
+    "security": "test-region-1",
+    "compute": "test-region-1",
+    "data": "test-region-1",
+    "monitoring": "test-region-1",
+    "ingress": "test-region-1"
+  },
+  "names": {
+    "resourceGroup": "rg-synthetic-compile",
+    "virtualNetwork": "vnet-synthetic-compile",
+    "appGatewayNetworkSecurityGroup": "nsg-appgw-synthetic-compile",
+    "privateEndpointNetworkSecurityGroup": "nsg-pe-synthetic-compile",
+    "appGatewaySubnet": "snet-appgw",
+    "containerAppsSubnet": "snet-container-apps",
+    "privateEndpointSubnet": "snet-private-endpoints",
+    "firewallSubnet": "AzureFirewallSubnet",
+    "firewallPublicIp": "pip-firewall-synthetic-compile",
+    "firewallPolicy": "afwp-synthetic-compile",
+    "firewall": "afw-synthetic-compile",
+    "firewallRuleCollectionGroup": "approved-egress",
+    "workloadRouteTable": "rt-workloads-synthetic-compile",
+    "logAnalytics": "log-synthetic-compile",
+    "applicationInsights": "appi-synthetic-compile",
+    "monitorPrivateLinkScope": "ampls-synthetic-compile",
+    "appIdentity": "id-app-synthetic-compile",
+    "migrationIdentity": "id-migration-synthetic-compile",
+    "gatewayIdentity": "id-gateway-synthetic-compile",
+    "keyVault": "kv-synthetic-compile",
+    "containerRegistry": "acrsyntheticcompile",
+    "postgresServer": "psql-synthetic-compile",
+    "postgresDatabase": "foundation",
+    "containerAppsEnvironment": "cae-synthetic-compile",
+    "containerAppsInfrastructureResourceGroup": "rg-cae-infra-synthetic-compile",
+    "webContainerApp": "ca-web-synthetic-compile",
+    "migrationJob": "caj-migration-synthetic-compile",
+    "applicationGatewayPublicIp": "pip-appgw-synthetic-compile",
+    "applicationGatewayWafPolicy": "waf-synthetic-compile",
+    "applicationGateway": "agw-synthetic-compile",
+    "containerRegistryPrivateEndpoint": "pe-acr-synthetic-compile",
+    "keyVaultPrivateEndpoint": "pe-kv-synthetic-compile",
+    "postgresPrivateEndpoint": "pe-psql-synthetic-compile",
+    "monitorPrivateEndpoint": "pe-ampls-synthetic-compile"
+  },
+  "tags": {
+    "dataClassification": "Restricted",
+    "managedBy": "bicep",
+    "purpose": "compile-fixture"
+  },
+  "network": {
+    "vnetAddressPrefixes": ["10.80.0.0/16"],
+    "dnsServers": [],
+    "subnets": {
+      "applicationGateway": "10.80.0.0/24",
+      "containerApps": "10.80.4.0/23",
+      "privateEndpoints": "10.80.8.0/24",
+      "firewall": "10.80.15.0/26"
+    }
+  },
+  "privateDnsZones": {
+    "containerRegistry": ["privatelink.azurecr.io"],
+    "keyVault": ["privatelink.vaultcore.azure.net"],
+    "postgres": ["privatelink.postgres.database.azure.com"],
+    "azureMonitor": [
+      "privatelink.monitor.azure.com",
+      "privatelink.oms.opinsights.azure.com",
+      "privatelink.ods.opinsights.azure.com",
+      "privatelink.agentsvc.azure-automation.net",
+      "privatelink.blob.core.windows.net"
+    ]
+  },
+  "egress": {
+    "mode": "unresolved",
+    "outboundControlApproved": false,
+    "firewall": {
+      "skuTier": "Standard",
+      "zones": ["1", "2", "3"],
+      "allowedFqdns": ["packages.example.test"]
+    }
+  },
+  "applicationGateway": {
+    "skuName": "WAF_v2",
+    "skuTier": "WAF_v2",
+    "zones": ["1", "2", "3"],
+    "enableFips": true,
+    "sslPolicyName": "AppGwSslPolicy20220101S",
+    "wafRuleSetVersion": "3.2",
+    "botManagerRuleSetVersion": "1.1",
+    "publicIpIdleTimeoutMinutes": 4,
+    "autoscale": {
+      "minimumCapacity": 2,
+      "maximumCapacity": 4
+    },
+    "backend": {
+      "drainTimeoutSeconds": 30,
+      "requestTimeoutSeconds": 30
+    },
+    "probe": {
+      "intervalSeconds": 30,
+      "timeoutSeconds": 10,
+      "unhealthyThreshold": 3
+    },
+    "waf": {
+      "fileUploadLimitMb": 10,
+      "jsChallengeCookieExpirationMinutes": 5,
+      "maximumRequestBodySizeKb": 128,
+      "requestBodyInspectLimitKb": 128
+    }
+  },
+  "containerApps": {
+    "zoneRedundant": true,
+    "network": {
+      "dockerBridgeCidr": "172.20.0.0/24",
+      "platformReservedCidr": "172.21.0.0/21",
+      "platformReservedDnsIp": "172.21.0.10"
+    },
+    "workloadProfile": {
+      "name": "workload",
+      "type": "D4",
+      "minimumCount": 1,
+      "maximumCount": 3
+    },
+    "ingress": {
+      "headerCountLimit": 100,
+      "requestIdleTimeoutMinutes": 4,
+      "terminationGracePeriodSeconds": 480
+    },
+    "app": {
+      "targetPort": 3000,
+      "cpu": 1,
+      "memory": "2Gi",
+      "terminationGracePeriodSeconds": 60,
+      "scale": {
+        "minimumReplicas": 2,
+        "maximumReplicas": 5,
+        "cooldownSeconds": 300,
+        "pollingIntervalSeconds": 30,
+        "concurrentRequests": 50
+      }
+    },
+    "migration": {
+      "cpu": 1,
+      "memory": "2Gi",
+      "retryLimit": 1,
+      "timeoutSeconds": 1800
+    }
+  },
+  "containerRegistry": {
+    "sku": "Premium",
+    "retentionDays": 30,
+    "softDeleteRetentionDays": 30,
+    "zoneRedundancy": "Enabled"
+  },
+  "keyVault": {
+    "sku": "standard",
+    "softDeleteRetentionDays": 90
+  },
+  "postgres": {
+    "version": "18",
+    "skuName": "Standard_D2ds_v5",
+    "skuTier": "GeneralPurpose",
+    "availabilityZone": "1",
+    "highAvailabilityMode": "ZoneRedundant",
+    "standbyAvailabilityZone": "2",
+    "backupRetentionDays": 14,
+    "geoRedundantBackup": "Disabled",
+    "backupSecondaryLocation": "",
+    "replicas": [],
+    "maintenanceWindow": {
+      "dayOfWeek": 0,
+      "startHour": 2,
+      "startMinute": 0
+    },
+    "storage": {
+      "autoGrow": "Enabled",
+      "sizeGb": 128,
+      "tier": "P10",
+      "type": "Premium_LRS"
+    },
+    "databaseCharset": "UTF8",
+    "databaseCollation": "en_US.utf8",
+    "minimumTlsVersion": "TLSv1.3",
+    "entraAdministratorObjectId": "11111111-1111-4111-8111-111111111111",
+    "entraAdministratorPrincipalName": "synthetic-admin",
+    "entraAdministratorPrincipalType": "Group",
+    "appPrincipalName": "synthetic-app-identity",
+    "migrationPrincipalName": "synthetic-migration-identity"
+  },
+  "monitoring": {
+    "amplsLocation": "global",
+    "logAnalyticsSku": "PerGB2018",
+    "logRetentionDays": 30,
+    "applicationInsightsRetentionDays": 30,
+    "dailyQuotaGb": 1,
+    "privateIngestion": true,
+    "privateQuery": true,
+    "regionalDestinationApproved": false,
+    "regionalDestinationApprovalReference": "",
+    "retentionApproved": false,
+    "retentionApprovalReference": "",
+    "amplsNonRegionalControlPlaneApproved": false,
+    "amplsNonRegionalApprovalReference": "",
+    "runtimeLogs": {
+      "enabled": true,
+      "format": "pii-safe-json-stdout",
+      "destination": "regional-log-analytics-via-azure-monitor-diagnostics"
+    },
+    "runtimeExporter": {
+      "status": "scaffolded-disabled",
+      "telemetryMode": "disabled",
+      "exporter": "none",
+      "disabledReason": "Stable @azure/monitor-opentelemetry@1.18.2 resolves prerelease @azure/monitor-opentelemetry-exporter@1.0.0-beta.43 and requires a Node --import loader incompatible with the Next.js 16 standalone entry point.",
+      "postureApproved": false,
+      "approvalReference": ""
+    },
+    "dataCollection": {
+      "dataCollectionEndpointRequired": false,
+      "dataCollectionRuleRequired": false,
+      "decisionApproved": false,
+      "approvalReference": ""
+    },
+    "queryAccess": {
+      "identityType": "UserAssignedManagedIdentity",
+      "principalId": "44444444-4444-4444-8444-444444444444",
+      "clientId": "55555555-5555-4555-8555-555555555555",
+      "roleDefinitionId": "3b03c2da-16b3-4a49-8834-0f8130efdd3b",
+      "roleScope": "LogAnalyticsWorkspace",
+      "roleAssignmentApproved": false,
+      "approvalReference": "",
+      "federatedCredentialManagedExternally": true,
+      "protectedEnvironmentVariable": "AZURE_MIGRATION_RUNTIME_CLIENT_ID"
+    }
+  },
+  "diagnostics": {
+    "categoriesVerified": false,
+    "approvalReference": "",
+    "keyVault": ["AuditEvent"],
+    "containerRegistry": ["ContainerRegistryRepositoryEvents", "ContainerRegistryLoginEvents"],
+    "postgres": ["PostgreSQLLogs"],
+    "containerAppsEnvironment": ["ContainerAppSystemLogs"],
+    "containerApp": ["ContainerAppConsoleLogs"],
+    "applicationGateway": [
+      "ApplicationGatewayAccessLog",
+      "ApplicationGatewayPerformanceLog",
+      "ApplicationGatewayFirewallLog"
+    ]
+  },
+  "image": {
+    "repository": "foundation/web",
+    "tag": "compile-only",
+    "migrationCommand": ["node"],
+    "migrationArguments": ["migration/dist/migrate-production.mjs"]
+  },
+  "dns": {
+    "publicHost": "platform.example.test",
+    "callbackHost": "platform.example.test",
+    "domainOwnershipApproved": false
+  },
+  "tls": {
+    "certificateVersionedSecretUri": "https://kv-synthetic-compile.vault.azure.net/secrets/gateway-tls/11111111111111111111111111111111",
+    "certificateName": "gateway-tls",
+    "minimumVersion": "TLS1_2",
+    "ownershipApproved": false
+  },
+  "auth": {
+    "provider": "microsoftEntra",
+    "issuer": "https://login.microsoftonline.com/11111111-1111-4111-8111-111111111111/v2.0",
+    "audience": "api://synthetic-foundation",
+    "tenantId": "11111111-1111-4111-8111-111111111111",
+    "clientId": "22222222-2222-4222-8222-222222222222",
+    "clientSecretKeyVaultUrl": "https://kv-synthetic-compile.vault.azure.net/secrets/oidc-client/22222222222222222222222222222222",
+    "callbackUrls": ["https://platform.example.test/.auth/login/aad/callback"],
+    "allowedIdentities": ["33333333-3333-4333-8333-333333333333"],
+    "allowedClientApplications": [],
+    "allowedGroups": [],
+    "loginParameters": [],
+    "customProviderName": "synthetic-oidc",
+    "authorizationEndpoint": "https://identity.example.test/authorize",
+    "certificationUri": "https://identity.example.test/keys",
+    "tokenEndpoint": "https://identity.example.test/token",
+    "wellKnownOpenIdConfiguration": "https://identity.example.test/.well-known/openid-configuration",
+    "nameClaimType": "name",
+    "scopes": ["openid", "profile"],
+    "cookieExpiration": "08:00:00",
+    "nonceExpiration": "00:05:00",
+    "forwardedHostTrustApproved": false
+  },
+  "dataPlanes": {
+    "containerRegistryPublicAccess": "Disabled",
+    "keyVaultPublicAccess": "Disabled",
+    "postgresPublicAccess": "Disabled",
+    "monitoringPublicIngestion": "Disabled",
+    "monitoringPublicQuery": "Disabled"
+  },
+  "accessPolicies": {
+    "privateDataPlanesRequired": true,
+    "managedIdentityRequired": true,
+    "localAuthDisabled": true,
+    "diagnosticDataApproved": false
+  },
+  "globalEdge": {
+    "enabled": false,
+    "approvalReference": ""
+  },
+  "delivery": {
+    "privateAcrRunnerType": "unresolved",
+    "privateAcrRunnerApproved": false
+  },
+  "features": {
+    "enableFoundry": false,
+    "enableFirewall": false,
+    "enableAmpls": true,
+    "enableDiagnostics": false
+  }
+}

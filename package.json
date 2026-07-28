@@ -1,0 +1,50 @@
+{
+  "name": "agent-ready-fullstack-on-azure-starter",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Agent-ready full-stack on Azure starter",
+  "license": "MIT",
+  "engines": {
+    "node": "24.18.0",
+    "pnpm": "11.17.0"
+  },
+  "packageManager": "pnpm@11.17.0",
+  "scripts": {
+    "dev": "TURBO_TELEMETRY_DISABLED=1 NEXT_TELEMETRY_DISABLED=1 turbo run dev",
+    "build": "TURBO_TELEMETRY_DISABLED=1 NEXT_TELEMETRY_DISABLED=1 turbo run build",
+    "lint": "eslint scripts vitest.config.ts eslint.config.mjs --max-warnings=0 && turbo run lint",
+    "typecheck": "tsc -p tsconfig.json --noEmit && turbo run typecheck",
+    "test": "pnpm test:unit",
+    "test:unit": "vitest run --config vitest.config.ts && turbo run test:unit",
+    "test:integration": "turbo run test:integration",
+    "e2e": "turbo run e2e",
+    "deps:audit": "node scripts/audit-dependencies.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "spec:new": "tsx scripts/specs/new.ts",
+    "spec:validate": "tsx scripts/specs/validate.ts",
+    "spec:validate:all": "tsx scripts/specs/validate.ts --all",
+    "db:generate": "pnpm --filter @repo/db --if-present run db:generate",
+    "db:migrate:local": "pnpm --filter @repo/db --if-present run db:migrate:local",
+    "db:check": "pnpm --filter @repo/db --if-present run db:check",
+    "db:studio": "pnpm --filter @repo/db --if-present run db:studio",
+    "infra:validate": "node infra/scripts/validate.mjs",
+    "docker:build": "docker build --file Dockerfile --tag agent-ready-fullstack-on-azure-starter:local .",
+    "check": "pnpm deps:audit && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:unit && pnpm spec:validate:all && pnpm infra:validate",
+    "clean": "turbo run clean && rm -rf .turbo coverage"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "24.13.3",
+    "eslint": "9.39.5",
+    "globals": "17.8.0",
+    "prettier": "3.9.6",
+    "prettier-plugin-tailwindcss": "0.8.1",
+    "tsx": "4.23.1",
+    "turbo": "2.10.7",
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
+  }
+}

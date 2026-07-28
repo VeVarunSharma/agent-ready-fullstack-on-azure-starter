@@ -1,0 +1,63 @@
+name: Infrastructure validation
+
+on:
+  pull_request:
+  push:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: infra-validate-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: "true"
+  NEXT_TELEMETRY_DISABLED: "1"
+  TURBO_TELEMETRY_DISABLED: "1"
+
+jobs:
+  validate:
+    name: Offline Bicep and production preflight tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install exact pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          version: 11.17.0
+          run_install: false
+
+      - name: Set up exact Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install frozen dependencies
+        run: pnpm install --frozen-lockfile --strict-peer-dependencies
+
+      - name: Install verified Bicep CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p infra/.tools
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \
+            --output infra/.tools/bicep \
+            https://github.com/Azure/bicep/releases/download/v0.45.15/bicep-linux-x64
+          printf '%s  %s\n' \
+            ff5b194b042c220df4a50d6768ed1d6c39a32894bfdc4ff83d62b115d966a7ce \
+            infra/.tools/bicep | sha256sum --check --strict
+          chmod 0755 infra/.tools/bicep
+          echo "BICEP_CLI=infra/.tools/bicep" >> "$GITHUB_ENV"
+
+      # This command uses --no-restore Bicep operations and local Node tests only.
+      - name: Format, lint, build, and test infrastructure offline
+        run: pnpm infra:validate

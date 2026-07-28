@@ -1,0 +1,65 @@
+---
+id: "REPLACE_WITH_ID"
+version: "REPLACE_WITH_VERSION"
+path: "REPLACE_WITH_PATH"
+title: REPLACE_WITH_TITLE_JSON
+summary: REPLACE_WITH_SUMMARY_JSON
+lifecycle: "REPLACE_WITH_LIFECYCLE"
+owners: REPLACE_WITH_OWNERS
+created: "REPLACE_WITH_CREATED"
+updated: "REPLACE_WITH_UPDATED"
+dataClassification: "REPLACE_WITH_DATA_CLASSIFICATION"
+supersededBy: null
+architectureImpact: REPLACE_WITH_ARCHITECTURE_IMPACT
+designSystemImpact: REPLACE_WITH_DESIGN_SYSTEM_IMPACT
+sensitiveDataImpact: REPLACE_WITH_SENSITIVE_DATA_IMPACT
+persistenceImpact: REPLACE_WITH_PERSISTENCE_IMPACT
+---
+
+# PRD VREPLACE_WITH_VERSION: REPLACE_WITH_TITLE
+
+## Overview
+
+REPLACE_WITH_OVERVIEW
+
+## Motivation
+
+REPLACE_WITH_MOTIVATION
+
+## Scope
+
+- REPLACE_WITH_IN_SCOPE_ITEM
+
+## Out of Scope
+
+- REPLACE_WITH_OUT_OF_SCOPE_ITEM
+
+## Feature Specifications
+
+### FS-001: REPLACE_WITH_FEATURE_NAME
+
+REPLACE_WITH_FEATURE_SPECIFICATION
+
+## Affected Files
+
+- `REPLACE_WITH_REPOSITORY_RELATIVE_PATH` — REPLACE_WITH_EXPECTED_CHANGE
+
+## Acceptance Criteria
+
+- [ ] **AC-001**: REPLACE_WITH_TESTABLE_ACCEPTANCE_CRITERION
+
+## Migration and Configuration
+
+REPLACE_WITH_MIGRATION_OR_CONFIGURATION_PLAN
+
+## Verification
+
+| Criterion | Method    | Evidence                            |
+| --------- | --------- | ----------------------------------- |
+| AC-001    | automated | `REPLACE_WITH_TEST_PATH_OR_COMMAND` |
+
+## Status
+
+Lifecycle: **REPLACE_WITH_LIFECYCLE**
+
+REPLACE_WITH_STATUS_NOTES

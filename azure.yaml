@@ -1,0 +1,23 @@
+name: agent-ready-fullstack-on-azure-starter
+
+metadata:
+  template: agent-ready-fullstack-on-azure-starter@0.0.0
+
+infra:
+  provider: bicep
+  path: infra
+  module: main
+
+requiredVersions:
+  azd: "1.28.1"
+
+services: {}
+
+hooks:
+  preprovision:
+    shell: sh
+    run: >-
+      node infra/scripts/preflight.mjs --config
+      "${INFRA_PREFLIGHT_CONFIG:-infra/environments/production.config.json}"
+    continueOnError: false
+    interactive: false

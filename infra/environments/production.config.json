@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "deploymentProfile": "production",
+  "dataClassification": "Restricted",
+  "workloadName": "",
+  "environmentName": "production",
+  "primaryLocation": "",
+  "approvedLocations": [],
+  "resourceLocations": {},
+  "names": {},
+  "tags": {},
+  "network": {
+    "vnetAddressPrefixes": [],
+    "dnsServers": [],
+    "subnets": {}
+  },
+  "privateDnsZones": {},
+  "egress": {
+    "mode": "unresolved",
+    "outboundControlApproved": false,
+    "firewall": {
+      "skuTier": "",
+      "zones": [],
+      "allowedFqdns": []
+    }
+  },
+  "applicationGateway": {},
+  "containerApps": {},
+  "containerRegistry": {
+    "sku": ""
+  },
+  "keyVault": {
+    "sku": ""
+  },
+  "postgres": {
+    "skuName": "",
+    "skuTier": "",
+    "highAvailabilityMode": "",
+    "backupRetentionDays": 0,
+    "geoRedundantBackup": "Disabled",
+    "backupSecondaryLocation": "",
+    "replicas": [],
+    "appPrincipalName": "",
+    "migrationPrincipalName": ""
+  },
+  "monitoring": {
+    "amplsLocation": "global",
+    "logAnalyticsSku": "",
+    "logRetentionDays": 0,
+    "applicationInsightsRetentionDays": 0,
+    "dailyQuotaGb": 0,
+    "privateIngestion": false,
+    "privateQuery": false,
+    "regionalDestinationApproved": false,
+    "regionalDestinationApprovalReference": "",
+    "retentionApproved": false,
+    "retentionApprovalReference": "",
+    "amplsNonRegionalControlPlaneApproved": false,
+    "amplsNonRegionalApprovalReference": "",
+    "runtimeLogs": {
+      "enabled": true,
+      "format": "pii-safe-json-stdout",
+      "destination": "regional-log-analytics-via-azure-monitor-diagnostics"
+    },
+    "runtimeExporter": {
+      "status": "scaffolded-disabled",
+      "telemetryMode": "disabled",
+      "exporter": "none",
+      "disabledReason": "Stable @azure/monitor-opentelemetry@1.18.2 resolves prerelease @azure/monitor-opentelemetry-exporter@1.0.0-beta.43 and requires a Node --import loader incompatible with the Next.js 16 standalone entry point.",
+      "postureApproved": false,
+      "approvalReference": ""
+    },
+    "dataCollection": {
+      "dataCollectionEndpointRequired": false,
+      "dataCollectionRuleRequired": false,
+      "decisionApproved": false,
+      "approvalReference": ""
+    },
+    "queryAccess": {
+      "identityType": "",
+      "principalId": "",
+      "clientId": "",
+      "roleDefinitionId": "3b03c2da-16b3-4a49-8834-0f8130efdd3b",
+      "roleScope": "LogAnalyticsWorkspace",
+      "roleAssignmentApproved": false,
+      "approvalReference": "",
+      "federatedCredentialManagedExternally": true,
+      "protectedEnvironmentVariable": "AZURE_MIGRATION_RUNTIME_CLIENT_ID"
+    }
+  },
+  "diagnostics": {
+    "categoriesVerified": false,
+    "approvalReference": "",
+    "keyVault": ["AuditEvent"],
+    "containerRegistry": ["ContainerRegistryRepositoryEvents", "ContainerRegistryLoginEvents"],
+    "postgres": ["PostgreSQLLogs"],
+    "containerAppsEnvironment": ["ContainerAppSystemLogs"],
+    "containerApp": ["ContainerAppConsoleLogs"],
+    "applicationGateway": [
+      "ApplicationGatewayAccessLog",
+      "ApplicationGatewayPerformanceLog",
+      "ApplicationGatewayFirewallLog"
+    ]
+  },
+  "image": {
+    "repository": "",
+    "tag": "",
+    "migrationCommand": [],
+    "migrationArguments": []
+  },
+  "dns": {
+    "publicHost": "",
+    "callbackHost": "",
+    "domainOwnershipApproved": false
+  },
+  "tls": {
+    "certificateVersionedSecretUri": "",
+    "certificateName": "",
+    "minimumVersion": "",
+    "ownershipApproved": false
+  },
+  "auth": {
+    "provider": "",
+    "issuer": "",
+    "audience": "",
+    "tenantId": "",
+    "clientId": "",
+    "clientSecretKeyVaultUrl": "",
+    "callbackUrls": [],
+    "allowedIdentities": [],
+    "allowedClientApplications": [],
+    "allowedGroups": [],
+    "loginParameters": [],
+    "customProviderName": "",
+    "authorizationEndpoint": "",
+    "certificationUri": "",
+    "tokenEndpoint": "",
+    "wellKnownOpenIdConfiguration": "",
+    "nameClaimType": "",
+    "scopes": [],
+    "cookieExpiration": "",
+    "nonceExpiration": "",
+    "forwardedHostTrustApproved": false
+  },
+  "dataPlanes": {
+    "containerRegistryPublicAccess": "Enabled",
+    "keyVaultPublicAccess": "Enabled",
+    "postgresPublicAccess": "Enabled",
+    "monitoringPublicIngestion": "Enabled",
+    "monitoringPublicQuery": "Enabled"
+  },
+  "accessPolicies": {
+    "privateDataPlanesRequired": true,
+    "managedIdentityRequired": true,
+    "localAuthDisabled": true,
+    "diagnosticDataApproved": false
+  },
+  "globalEdge": {
+    "enabled": false,
+    "approvalReference": ""
+  },
+  "delivery": {
+    "privateAcrRunnerType": "unresolved",
+    "privateAcrRunnerApproved": false
+  },
+  "features": {
+    "enableFoundry": false,
+    "enableFirewall": false,
+    "enableAmpls": true,
+    "enableDiagnostics": false
+  }
+}

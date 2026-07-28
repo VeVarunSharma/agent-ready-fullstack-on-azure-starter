@@ -1,0 +1,704 @@
+name: Production foundation what-if
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type PLAN PRODUCTION exactly.
+        required: true
+        type: string
+      config_sha256:
+        description: Lowercase SHA-256 of the protected PRODUCTION_CONFIG_JSON value.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-infrastructure-plan
+  cancel-in-progress: false
+
+env:
+  CI: "true"
+  NEXT_TELEMETRY_DISABLED: "1"
+  TURBO_TELEMETRY_DISABLED: "1"
+  AZURE_CORE_COLLECT_TELEMETRY: "0"
+  AZURE_CORE_OUTPUT: none
+  AZURE_EXTENSION_USE_DYNAMIC_INSTALL: "no"
+  AZURE_LOGIN_PRE_CLEANUP: "true"
+  AZURE_LOGIN_POST_CLEANUP: "true"
+  DELIVERY_AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+  DELIVERY_AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+  DELIVERY_WHAT_IF_CLIENT_ID: ${{ vars.AZURE_WHAT_IF_CLIENT_ID }}
+  DELIVERY_REGISTRY_PUSH_CLIENT_ID: ${{ vars.AZURE_REGISTRY_PUSH_CLIENT_ID }}
+  DELIVERY_INFRA_DEPLOY_CLIENT_ID: ${{ vars.AZURE_INFRA_DEPLOY_CLIENT_ID }}
+  DELIVERY_MIGRATION_RUNTIME_CLIENT_ID: ${{ vars.AZURE_MIGRATION_RUNTIME_CLIENT_ID }}
+
+jobs:
+  prepare-plan:
+    name: Tokenless preflight and plan artifact
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    # This environment owns the protected configuration. This job never receives an OIDC token.
+    environment: production
+    permissions:
+      contents: read
+
+    steps:
+      - name: Guard manual target before checkout
+        shell: bash
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          SELECTED_REF: ${{ github.ref }}
+        run: |
+          set -euo pipefail
+          test "$SELECTED_REF" = "refs/heads/$DEFAULT_BRANCH" || {
+            echo "::error::Production what-if is restricted to the default branch."
+            exit 1
+          }
+          test "$CONFIRMATION" = "PLAN PRODUCTION" || {
+            echo "::error::The production plan confirmation did not match."
+            exit 1
+          }
+
+      - name: Check out reviewed commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install exact pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          version: 11.17.0
+          run_install: false
+
+      - name: Set up exact Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install frozen dependencies
+        run: pnpm install --frozen-lockfile --strict-peer-dependencies
+
+      - name: Install verified Bicep CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .toolchain
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \
+            --output .toolchain/bicep \
+            https://github.com/Azure/bicep/releases/download/v0.45.15/bicep-linux-x64
+          printf '%s  %s\n' \
+            ff5b194b042c220df4a50d6768ed1d6c39a32894bfdc4ff83d62b115d966a7ce \
+            .toolchain/bicep | sha256sum --check --strict
+          chmod 0755 .toolchain/bicep
+          echo "BICEP_CLI=.toolchain/bicep" >> "$GITHUB_ENV"
+
+      - name: Verify reviewed source before offline validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA" || {
+            echo "::error::The checkout does not match the workflow's reviewed commit."
+            exit 1
+          }
+          git diff --exit-code
+          git diff --cached --exit-code
+          test -z "$(git status --porcelain --untracked-files=all)" || {
+            echo "::error::Dependency installation changed the reviewed checkout."
+            git status --short
+            exit 1
+          }
+
+      - name: Validate infrastructure offline
+        run: pnpm infra:validate
+
+      - name: Verify offline validation did not mutate source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code
+          git diff --cached --exit-code
+          test -z "$(git status --porcelain --untracked-files=all)"
+
+      - name: Validate protected configuration and prepare immutable template
+        shell: bash
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+          EXPECTED_CONFIG_SHA256: ${{ inputs.config_sha256 }}
+          PRODUCTION_CONFIG_JSON: ${{ secrets.PRODUCTION_CONFIG_JSON }}
+          WHAT_IF_CLIENT_ID: ${{ vars.AZURE_WHAT_IF_CLIENT_ID }}
+          REGISTRY_PUSH_CLIENT_ID: ${{ vars.AZURE_REGISTRY_PUSH_CLIENT_ID }}
+          INFRA_DEPLOY_CLIENT_ID: ${{ vars.AZURE_INFRA_DEPLOY_CLIENT_ID }}
+          MIGRATION_RUNTIME_CLIENT_ID: ${{ vars.AZURE_MIGRATION_RUNTIME_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          SELECTED_REF: ${{ github.ref }}
+          SELECTED_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test "$SELECTED_REF" = "refs/heads/$DEFAULT_BRANCH"
+          test "$CONFIRMATION" = "PLAN PRODUCTION"
+          [[ "$EXPECTED_CONFIG_SHA256" =~ ^[0-9a-f]{64}$ ]] || {
+            echo "::error::A lowercase production configuration SHA-256 is required."
+            exit 1
+          }
+          test -n "$PRODUCTION_CONFIG_JSON" || {
+            echo "::error::The protected production configuration is missing."
+            exit 1
+          }
+          artifact_dir="delivery-artifacts/plan-source"
+          protected_dir="delivery-artifacts/protected-plan"
+          protected_config="$protected_dir/production.config.json"
+          mkdir -p "$artifact_dir" "$protected_dir"
+          umask 077
+          printf '%s' "$PRODUCTION_CONFIG_JSON" > "$protected_config"
+          actual_config_sha256="$(sha256sum "$protected_config" | cut -d ' ' -f 1)"
+          test "$actual_config_sha256" = "$EXPECTED_CONFIG_SHA256" || {
+            echo "::error::The protected production configuration digest did not match."
+            exit 1
+          }
+
+          node infra/scripts/preflight.mjs --config "$protected_config"
+          printf '%s  %s\n' \
+            ff5b194b042c220df4a50d6768ed1d6c39a32894bfdc4ff83d62b115d966a7ce \
+            .toolchain/bicep | sha256sum --check --strict
+          .toolchain/bicep build infra/main.bicep \
+            --outfile "$artifact_dir/main.json" \
+            --no-restore
+
+          template_sha256="$(sha256sum "$artifact_dir/main.json" | cut -d ' ' -f 1)"
+          bicep_sha256="$(
+            find infra -type f \( -name '*.bicep' -o -name 'bicepconfig.json' \) -print0 \
+              | LC_ALL=C sort -z \
+              | xargs -0 sha256sum \
+              | sha256sum \
+              | cut -d ' ' -f 1
+          )"
+          export ACTUAL_CONFIG_SHA256="$actual_config_sha256"
+          export TEMPLATE_SHA256="$template_sha256"
+          export BICEP_SHA256="$bicep_sha256"
+          export ARTIFACT_DIR="$artifact_dir"
+          export PROTECTED_CONFIG="$protected_config"
+
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          from pathlib import Path
+
+          uuid = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", re.I)
+          identity_names = (
+              "WHAT_IF_CLIENT_ID",
+              "REGISTRY_PUSH_CLIENT_ID",
+              "INFRA_DEPLOY_CLIENT_ID",
+              "MIGRATION_RUNTIME_CLIENT_ID",
+          )
+          identity_values = []
+          for name in (*identity_names, "AZURE_TENANT_ID", "AZURE_SUBSCRIPTION_ID"):
+              if not uuid.fullmatch(os.environ.get(name, "")):
+                  raise SystemExit(f"{name} must be a concrete UUID from protected variables.")
+              if name in identity_names:
+                  identity_values.append(os.environ[name].lower())
+          if len(set(identity_values)) != len(identity_names):
+              raise SystemExit("Each Azure delivery duty must use a distinct federated client ID.")
+
+          artifact_dir = Path(os.environ["ARTIFACT_DIR"])
+          config = json.loads(Path(os.environ["PROTECTED_CONFIG"]).read_text(encoding="utf-8"))
+          if str(config.get("auth", {}).get("tenantId", "")).lower() != os.environ["AZURE_TENANT_ID"].lower():
+              raise SystemExit("The deployment and workload-federation tenant IDs must match.")
+          if config.get("image", {}).get("tag") != os.environ["SELECTED_SHA"]:
+              raise SystemExit("The production image tag must equal the reviewed full commit SHA.")
+          if config.get("features", {}).get("enableFoundry") is not False:
+              raise SystemExit("Foundry must remain disabled for this foundation plan.")
+
+          evidence = {
+              "schemaVersion": 1,
+              "runId": os.environ["GITHUB_RUN_ID"],
+              "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "commitSha": os.environ["SELECTED_SHA"],
+              "configSha256": os.environ["ACTUAL_CONFIG_SHA256"],
+              "bicepSha256": os.environ["BICEP_SHA256"],
+              "templateSha256": os.environ["TEMPLATE_SHA256"],
+              "azureTarget": {
+                  "tenantId": os.environ["AZURE_TENANT_ID"].lower(),
+                  "subscriptionId": os.environ["AZURE_SUBSCRIPTION_ID"].lower(),
+              },
+              "federatedClientIds": {
+                  "whatIf": os.environ["WHAT_IF_CLIENT_ID"].lower(),
+                  "registryPush": os.environ["REGISTRY_PUSH_CLIENT_ID"].lower(),
+                  "infrastructureDeployment": os.environ[
+                      "INFRA_DEPLOY_CLIENT_ID"
+                  ].lower(),
+                  "migrationRuntime": os.environ[
+                      "MIGRATION_RUNTIME_CLIENT_ID"
+                  ].lower(),
+              },
+              "stage": "foundation",
+          }
+          (artifact_dir / "source-evidence.json").write_text(
+              json.dumps(evidence, sort_keys=True, separators=(",", ":")) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+          (
+            cd "$artifact_dir"
+            sha256sum main.json source-evidence.json > source.sha256
+          )
+
+      - name: Upload immutable plan source
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: production-plan-source-${{ github.run_id }}-${{ github.run_attempt }}
+          path: delivery-artifacts/plan-source
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Remove protected files
+        if: always()
+        shell: bash
+        run: rm -rf delivery-artifacts .toolchain
+
+  what-if:
+    name: OIDC what-if identity (foundation only)
+    needs: prepare-plan
+    runs-on:
+      group: production-vnet-runners
+      labels:
+        - self-hosted
+        - linux
+        - x64
+        - vnet-connected
+        - production
+        - azure-cli-2-88-0
+    timeout-minutes: 35
+    environment: production
+    permissions:
+      id-token: write
+    env:
+      AZURE_CONFIG_DIR: ${{ github.workspace }}/.azure-what-if
+
+    steps:
+      - name: Reset runner-local plan state
+        shell: bash
+        run: rm -rf -- delivery-artifacts "$AZURE_CONFIG_DIR"
+
+      - name: Download immutable plan source
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: production-plan-source-${{ github.run_id }}-${{ github.run_attempt }}
+          path: delivery-artifacts/plan-source
+
+      - name: Verify reviewed evidence before OIDC
+        shell: bash
+        env:
+          EXPECTED_CONFIG_SHA256: ${{ inputs.config_sha256 }}
+          EXPECTED_SHA: ${{ github.sha }}
+          PRODUCTION_CONFIG_JSON: ${{ secrets.PRODUCTION_CONFIG_JSON }}
+        run: |
+          set -euo pipefail
+          artifact_dir="delivery-artifacts/plan-source"
+          state_dir="delivery-artifacts/private-what-if"
+          config_path="$state_dir/production.config.json"
+          parameters_path="$state_dir/foundation.parameters.json"
+          mkdir -p "$state_dir"
+          umask 077
+          test -n "$PRODUCTION_CONFIG_JSON"
+          printf '%s' "$PRODUCTION_CONFIG_JSON" > "$config_path"
+          test "$(sha256sum "$config_path" | cut -d ' ' -f 1)" = "$EXPECTED_CONFIG_SHA256"
+          (cd "$artifact_dir" && sha256sum --check --strict source.sha256)
+          test "$(az version --query '"azure-cli"' --output tsv)" = "2.88.0" || {
+            echo "::error::The protected runner must provide Azure CLI 2.88.0."
+            exit 1
+          }
+
+          export ARTIFACT_DIR="$artifact_dir"
+          export CONFIG_PATH="$config_path"
+          export PARAMETERS_PATH="$parameters_path"
+          export STATE_DIR="$state_dir"
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ["ARTIFACT_DIR"])
+          evidence = json.loads((root / "source-evidence.json").read_text(encoding="utf-8"))
+          expected = {
+              "schemaVersion": 1,
+              "runId": os.environ["GITHUB_RUN_ID"],
+              "runAttempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "commitSha": os.environ["EXPECTED_SHA"],
+              "configSha256": os.environ["EXPECTED_CONFIG_SHA256"],
+              "stage": "foundation",
+          }
+          for key, value in expected.items():
+              if evidence.get(key) != value:
+                  raise SystemExit(f"Plan evidence mismatch for {key}.")
+          for key in ("bicepSha256", "templateSha256"):
+              value = evidence.get(key, "")
+              if len(value) != 64 or any(character not in "0123456789abcdef" for character in value):
+                  raise SystemExit(f"Plan evidence has an invalid {key}.")
+          template_digest = hashlib.sha256((root / "main.json").read_bytes()).hexdigest()
+          if template_digest != evidence["templateSha256"]:
+              raise SystemExit("Compiled template digest does not match plan evidence.")
+          if evidence.get("azureTarget") != {
+              "tenantId": os.environ["DELIVERY_AZURE_TENANT_ID"].lower(),
+              "subscriptionId": os.environ["DELIVERY_AZURE_SUBSCRIPTION_ID"].lower(),
+          } or evidence.get("federatedClientIds") != {
+              "whatIf": os.environ["DELIVERY_WHAT_IF_CLIENT_ID"].lower(),
+              "registryPush": os.environ["DELIVERY_REGISTRY_PUSH_CLIENT_ID"].lower(),
+              "infrastructureDeployment": os.environ[
+                  "DELIVERY_INFRA_DEPLOY_CLIENT_ID"
+              ].lower(),
+              "migrationRuntime": os.environ[
+                  "DELIVERY_MIGRATION_RUNTIME_CLIENT_ID"
+              ].lower(),
+          }:
+              raise SystemExit("Azure target identities changed after plan preparation.")
+
+          config = json.loads(Path(os.environ["CONFIG_PATH"]).read_text(encoding="utf-8"))
+          parameters = {
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {
+                  "config": {"value": config},
+                  "enableFoundry": {"value": False},
+                  "deploymentStage": {"value": "foundation"},
+                  "imageDigest": {"value": ""},
+                  "previousRevisionName": {"value": ""},
+                  "webRevisionSuffix": {"value": ""},
+              },
+          }
+          Path(os.environ["PARAMETERS_PATH"]).write_text(
+              json.dumps(parameters, sort_keys=True, separators=(",", ":")) + "\n",
+              encoding="utf-8",
+          )
+          PY
+          echo "ARTIFACT_DIR=$artifact_dir" >> "$GITHUB_ENV"
+          echo "CONFIG_PATH=$config_path" >> "$GITHUB_ENV"
+          echo "PARAMETERS_PATH=$parameters_path" >> "$GITHUB_ENV"
+          echo "STATE_DIR=$state_dir" >> "$GITHUB_ENV"
+
+      - name: Log in with the what-if federated identity
+        uses: Azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        with:
+          client-id: ${{ vars.AZURE_WHAT_IF_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: false
+
+      - name: Run foundation what-if without mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          artifact_dir="$ARTIFACT_DIR"
+          review_dir="delivery-artifacts/what-if-review"
+          mkdir -p "$review_dir"
+          location="$(
+            python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["primaryLocation"])' \
+              "$CONFIG_PATH"
+          )"
+          account_path="$STATE_DIR/account.json"
+          az account show --output json > "$account_path"
+          SOURCE_EVIDENCE="$artifact_dir/source-evidence.json" \
+            ACCOUNT_PATH="$account_path" EXPECTED_PURPOSE="whatIf" python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          evidence = json.loads(
+              Path(os.environ["SOURCE_EVIDENCE"]).read_text(encoding="utf-8")
+          )
+          account = json.loads(Path(os.environ["ACCOUNT_PATH"]).read_text(encoding="utf-8"))
+          target = evidence["azureTarget"]
+          identities = evidence["federatedClientIds"]
+          if target != {
+              "tenantId": os.environ["DELIVERY_AZURE_TENANT_ID"].lower(),
+              "subscriptionId": os.environ["DELIVERY_AZURE_SUBSCRIPTION_ID"].lower(),
+          } or identities != {
+              "whatIf": os.environ["DELIVERY_WHAT_IF_CLIENT_ID"].lower(),
+              "registryPush": os.environ["DELIVERY_REGISTRY_PUSH_CLIENT_ID"].lower(),
+              "infrastructureDeployment": os.environ[
+                  "DELIVERY_INFRA_DEPLOY_CLIENT_ID"
+              ].lower(),
+              "migrationRuntime": os.environ[
+                  "DELIVERY_MIGRATION_RUNTIME_CLIENT_ID"
+              ].lower(),
+          }:
+              raise SystemExit("Azure plan target variables changed.")
+          if (
+              str(account.get("tenantId", "")).lower() != target["tenantId"]
+              or str(account.get("id", "")).lower() != target["subscriptionId"]
+              or str(account.get("user", {}).get("type", "")).lower()
+              != "serviceprincipal"
+              or str(account.get("user", {}).get("name", "")).lower()
+              != identities[os.environ["EXPECTED_PURPOSE"]]
+          ):
+              raise SystemExit("The authenticated what-if identity is not reviewed.")
+          PY
+          az deployment sub what-if \
+            --name "foundation-plan-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --location "$location" \
+            --template-file "$artifact_dir/main.json" \
+            --parameters "@$PARAMETERS_PATH" \
+            --result-format FullResourcePayloads \
+            --no-pretty-print \
+            --only-show-errors \
+            --output json > "$STATE_DIR/foundation.what-if.raw.json"
+
+          export REVIEW_DIR="$review_dir"
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          import re
+          from pathlib import Path
+
+          source_root = Path(os.environ["ARTIFACT_DIR"])
+          review_root = Path(os.environ["REVIEW_DIR"])
+          source = json.loads(
+              (source_root / "source-evidence.json").read_text(encoding="utf-8")
+          )
+          result = json.loads(
+              (Path(os.environ["STATE_DIR"]) / "foundation.what-if.raw.json").read_text(
+                  encoding="utf-8"
+              )
+          )
+          changes = result.get("properties", {}).get("changes")
+          if not isinstance(changes, list):
+              raise SystemExit("Azure what-if returned an invalid result.")
+          allowed_types = {"Create", "Deploy", "Modify", "NoChange"}
+          rejected_types = {"Delete", "Ignore", "Unsupported"}
+          rejected = sorted(
+              {
+                  str(change.get("changeType", ""))
+                  for change in changes
+                  if change.get("changeType") not in allowed_types
+              }
+          )
+          if rejected:
+              raise SystemExit(f"What-if contains rejected change types: {rejected}.")
+          config = json.loads(Path(os.environ["CONFIG_PATH"]).read_text(encoding="utf-8"))
+          web_resource = (
+              f'/containerapps/{config["names"]["webContainerApp"]}'.lower()
+          )
+          job_resource = f'/jobs/{config["names"]["migrationJob"]}'.lower()
+
+          def enforce_policy(value, path=""):
+              if isinstance(value, dict):
+                  if (
+                      str(value.get("action", "")).lower() == "allow"
+                      and str(value.get("ipAddressRange", "")) == "0.0.0.0/0"
+                  ):
+                      raise SystemExit(f"Unsafe allow-all network rule at {path}.")
+                  for key, child in value.items():
+                      child_path = f"{path}.{key}" if path else key
+                      lowered = key.lower()
+                      if (
+                          lowered.startswith("publicnetworkaccess")
+                          and child != "Disabled"
+                      ):
+                          raise SystemExit(
+                              f"Public data-plane access is not disabled at {child_path}."
+                          )
+                      if lowered == "allowinsecure" and child is True:
+                          raise SystemExit(f"Insecure ingress is enabled at {child_path}.")
+                      if (
+                          lowered == "unauthenticatedclientaction"
+                          and child == "AllowAnonymous"
+                      ):
+                          raise SystemExit(
+                              f"Anonymous application access is enabled at {child_path}."
+                          )
+                      enforce_policy(child, child_path)
+              elif isinstance(value, list):
+                  for index, child in enumerate(value):
+                      enforce_policy(child, f"{path}[{index}]")
+
+          for change in changes:
+              resource_id = str(change.get("resourceId", "")).lower()
+              if web_resource in resource_id or job_resource in resource_id:
+                  raise SystemExit(
+                      "Foundation what-if may not modify application workload resources."
+                  )
+              enforce_policy(change.get("after"), resource_id)
+
+          sensitive = re.compile(
+              r"(secret|password|token|credential|connectionstring|privatekey|certificate)",
+              re.I,
+          )
+          visible = re.compile(
+              r"(name|type|location|kind|sku|tier|capacity|zones|version|publicnetworkaccess|"
+              r"external|ipsecurityrestrictions|ipaddressrange|action|traffic|route|dns|"
+              r"fqdn|host|domain|address|subnet|groupids|principal|roledefinition|identity|"
+              r"audience|issuer|transport|targetport|image|command|args|replica|scale|tls)",
+              re.I,
+          )
+          subscription_id = source["azureTarget"]["subscriptionId"]
+
+          def canonical(value):
+              if isinstance(value, dict):
+                  return {key: canonical(value[key]) for key in sorted(value)}
+              if isinstance(value, list):
+                  items = [canonical(item) for item in value]
+                  if items and all(isinstance(item, dict) for item in items):
+                      if all("resourceId" in item for item in items):
+                          items.sort(key=lambda item: str(item["resourceId"]).lower())
+                      elif all("path" in item for item in items):
+                          items.sort(key=lambda item: str(item["path"]))
+                  return items
+              return value
+
+          def digest(value):
+              payload = json.dumps(
+                  canonical(value), sort_keys=True, separators=(",", ":")
+              ).encode()
+              return hashlib.sha256(payload).hexdigest()
+
+          def safe_value(path, value):
+              if value is None or isinstance(value, (bool, int, float)):
+                  return value
+              if sensitive.search(path):
+                  return {"redacted": True, "type": type(value).__name__}
+              if isinstance(value, str) and visible.search(path):
+                  return value.replace(subscription_id, "<subscription>")
+              return {"sha256": digest(value), "redacted": True}
+
+          def flatten(value, path=""):
+              rows = []
+              if isinstance(value, dict):
+                  for key in sorted(value):
+                      rows.extend(
+                          flatten(value[key], f"{path}.{key}" if path else key)
+                      )
+              elif isinstance(value, list):
+                  for index, child in enumerate(value):
+                      rows.extend(flatten(child, f"{path}[{index}]"))
+              else:
+                  rows.append(
+                      {
+                          "path": path,
+                          "propertyChangeType": "Create",
+                          "after": safe_value(path, value),
+                      }
+                  )
+              return rows
+
+          def flatten_delta(entries):
+              rows = []
+              for entry in entries or []:
+                  path = str(entry.get("path", ""))
+                  if entry.get("children"):
+                      rows.extend(flatten_delta(entry["children"]))
+                  else:
+                      row = {
+                          "path": path,
+                          "propertyChangeType": entry.get(
+                              "propertyChangeType", "Modify"
+                          ),
+                      }
+                      if "before" in entry:
+                          row["before"] = safe_value(path, entry.get("before"))
+                      if "after" in entry:
+                          row["after"] = safe_value(path, entry.get("after"))
+                      rows.append(row)
+              return sorted(rows, key=lambda row: row["path"])
+
+          review_changes = []
+          for change in sorted(
+              changes, key=lambda item: str(item.get("resourceId", "")).lower()
+          ):
+              change_type = str(change.get("changeType", ""))
+              properties = (
+                  flatten(change.get("after"))
+                  if change_type == "Create"
+                  else flatten_delta(change.get("delta", []))
+              )
+              if change_type == "Modify" and not properties:
+                  properties = flatten(change.get("after"))
+              review_changes.append(
+                  {
+                      "resourceId": str(change.get("resourceId", "")).replace(
+                          subscription_id, "<subscription>"
+                      ),
+                      "changeType": change_type,
+                      "propertyChanges": properties,
+                  }
+              )
+          review = {
+              "schemaVersion": 1,
+              "policyVersion": "azure-what-if-v1",
+              "stage": "foundation",
+              "allowedChangeTypes": sorted(allowed_types),
+              "rejectedChangeTypes": sorted(rejected_types),
+              "changeSummary": {
+                  change_type: sum(
+                      1
+                      for change in changes
+                      if change.get("changeType") == change_type
+                  )
+                  for change_type in sorted(
+                      {str(change.get("changeType", "")) for change in changes}
+                  )
+              },
+              "changes": review_changes,
+          }
+          review_path = review_root / "foundation.what-if.review.json"
+          review_path.write_text(
+              json.dumps(review, sort_keys=True, separators=(",", ":")) + "\n",
+              encoding="utf-8",
+          )
+          raw_canonical = json.dumps(
+              canonical(result), sort_keys=True, separators=(",", ":")
+          ).encode()
+          source.update(
+              {
+                  "parametersSha256": hashlib.sha256(
+                      Path(os.environ["PARAMETERS_PATH"]).read_bytes()
+                  ).hexdigest(),
+                  "whatIfStateSha256": hashlib.sha256(raw_canonical).hexdigest(),
+                  "whatIfReviewSha256": hashlib.sha256(
+                      review_path.read_bytes()
+                  ).hexdigest(),
+                  "whatIfPolicyVersion": "azure-what-if-v1",
+                  "identityPurpose": "what-if",
+              }
+          )
+          (review_root / "plan-evidence.json").write_text(
+              json.dumps(source, sort_keys=True, separators=(",", ":")) + "\n",
+              encoding="utf-8",
+          )
+          PY
+          (
+            cd "$review_dir"
+            sha256sum \
+              foundation.what-if.review.json \
+              plan-evidence.json > plan.sha256
+          )
+
+      - name: Upload reviewable what-if evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: production-foundation-what-if-${{ github.run_id }}-${{ github.run_attempt }}
+          path: delivery-artifacts/what-if-review
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Clear Azure session
+        if: always()
+        shell: bash
+        run: |
+          az logout >/dev/null 2>&1 || true
+          az account clear >/dev/null 2>&1 || true
+
+      - name: Remove protected files
+        if: always()
+        shell: bash
+        run: rm -rf delivery-artifacts "$AZURE_CONFIG_DIR"
