@@ -22,10 +22,10 @@
   },
   "dependencies": {
     "@opentelemetry/api": "1.9.1",
-    "@orpc/client": "1.14.10",
+    "@orpc/client": "1.14.12",
     "@orpc/contract": "1.14.10",
-    "@orpc/openapi": "1.14.10",
-    "@orpc/openapi-client": "1.14.10",
+    "@orpc/openapi": "1.14.12",
+    "@orpc/openapi-client": "1.14.12",
     "@orpc/server": "1.14.10",
     "@orpc/zod": "1.14.10",
     "@repo/api-contracts": "workspace:*",
