@@ -91,7 +91,7 @@ jobs:
           persist-credentials: false
 
       - name: Install exact pnpm
-        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           version: 11.17.0
           run_install: false
@@ -441,7 +441,7 @@ jobs:
           )
 
       - name: Upload immutable deployment source
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: production-release-source-${{ github.run_id }}-${{ github.run_attempt }}
           path: delivery-artifacts/release-source
@@ -449,7 +449,7 @@ jobs:
           retention-days: 7
 
       - name: Upload tokenless image artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: production-release-image-${{ github.run_id }}-${{ github.run_attempt }}
           path: delivery-artifacts/release-image
@@ -491,7 +491,7 @@ jobs:
         run: rm -rf -- delivery-artifacts "$AZURE_CONFIG_DIR"
 
       - name: Download immutable deployment source
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: production-release-source-${{ github.run_id }}-${{ github.run_attempt }}
           path: delivery-artifacts/release-source
@@ -581,7 +581,7 @@ jobs:
           echo "PARAMETERS_PATH=$parameters_path" >> "$GITHUB_ENV"
 
       - name: Log in with the what-if federated identity
-        uses: Azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        uses: Azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
         with:
           client-id: ${{ vars.AZURE_WHAT_IF_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
@@ -882,7 +882,7 @@ jobs:
           )
 
       - name: Upload foundation what-if for protected review
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: production-foundation-plan-${{ github.run_id }}-${{ github.run_attempt }}
           path: delivery-artifacts/foundation-plan
@@ -923,7 +923,7 @@ jobs:
         run: rm -rf -- delivery-artifacts "$AZURE_CONFIG_DIR"
 
       - name: Download immutable source and reviewed foundation plan
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern:
             production-{release-source,foundation-plan}-${{ github.run_id }}-${{ github.run_attempt
@@ -1032,7 +1032,7 @@ jobs:
           echo "PARAMETERS_PATH=$parameters_path" >> "$GITHUB_ENV"
 
       - name: Log in with the infrastructure deployment federated identity
-        uses: Azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        uses: Azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
         with:
           client-id: ${{ vars.AZURE_INFRA_DEPLOY_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
@@ -1185,7 +1185,7 @@ jobs:
         run: rm -rf -- delivery-artifacts "$AZURE_CONFIG_DIR" "$DOCKER_CONFIG"
 
       - name: Download immutable source and tokenless image
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: production-release-{source,image}-${{ github.run_id }}-${{ github.run_attempt }}
           path: delivery-artifacts
@@ -1273,7 +1273,7 @@ jobs:
           echo "LOCAL_IMAGE_ID=$local_image_id" >> "$GITHUB_ENV"
 
       - name: Log in with the registry push federated identity
-        uses: Azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        uses: Azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
         with:
           client-id: ${{ vars.AZURE_REGISTRY_PUSH_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
@@ -1672,7 +1672,7 @@ jobs:
           )
 
       - name: Upload verified ACR digest evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: production-image-evidence-${{ github.run_id }}-${{ github.run_attempt }}
           path: delivery-artifacts/image-evidence
@@ -1726,7 +1726,7 @@ jobs:
         run: rm -rf -- delivery-artifacts "$AZURE_CONFIG_DIR"
 
       - name: Download source and verified image evidence
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern:
             production-{release-source,image-evidence}-${{ github.run_id }}-${{ github.run_attempt
@@ -1833,7 +1833,7 @@ jobs:
           echo "PARAMETERS_PATH=$parameters_path" >> "$GITHUB_ENV"
 
       - name: Log in with the what-if federated identity
-        uses: Azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        uses: Azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
         with:
           client-id: ${{ vars.AZURE_WHAT_IF_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
@@ -2130,7 +2130,7 @@ jobs:
           )
 
       - name: Upload migration what-if for protected review
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: production-migration-plan-${{ github.run_id }}-${{ github.run_attempt }}
           path: delivery-artifacts/migration-plan
@@ -2170,7 +2170,7 @@ jobs:
         run: rm -rf -- delivery-artifacts "$AZURE_CONFIG_DIR"
 
       - name: Download source, image, and reviewed migration plan
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern:
             production-{release-source,image-evidence,migration-plan}-${{ github.run_id }}-${{
@@ -2280,7 +2280,7 @@ jobs:
           echo "PARAMETERS_PATH=$parameters_path" >> "$GITHUB_ENV"
 
       - name: Log in with the infrastructure deployment federated identity
-        uses: Azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        uses: Azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
         with:
           client-id: ${{ vars.AZURE_INFRA_DEPLOY_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
@@ -2430,7 +2430,7 @@ jobs:
         run: rm -rf -- delivery-artifacts "$AZURE_CONFIG_DIR"
 
       - name: Download source and verified image evidence
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern:
             production-{release-source,image-evidence}-${{ github.run_id }}-${{ github.run_attempt
@@ -2502,7 +2502,7 @@ jobs:
           echo "CONFIG_PATH=$config_path" >> "$GITHUB_ENV"
 
       - name: Log in with the migration/runtime federated identity
-        uses: Azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        uses: Azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
         with:
           client-id: ${{ vars.AZURE_MIGRATION_RUNTIME_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
@@ -2773,7 +2773,7 @@ jobs:
           )
 
       - name: Upload successful migration evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: production-migration-evidence-${{ github.run_id }}-${{ github.run_attempt }}
           path: delivery-artifacts/migration-evidence
@@ -2813,7 +2813,7 @@ jobs:
         run: rm -rf -- delivery-artifacts "$AZURE_CONFIG_DIR"
 
       - name: Download source, image, and successful migration evidence
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern:
             production-{release-source,image-evidence,migration-evidence}-${{ github.run_id }}-${{
@@ -2903,7 +2903,7 @@ jobs:
           echo "STATE_DIR=$state_dir" >> "$GITHUB_ENV"
 
       - name: Log in with the what-if federated identity
-        uses: Azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        uses: Azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
         with:
           client-id: ${{ vars.AZURE_WHAT_IF_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
@@ -3316,7 +3316,7 @@ jobs:
           )
 
       - name: Upload application what-if for protected review
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: production-application-plan-${{ github.run_id }}-${{ github.run_attempt }}
           path: delivery-artifacts/application-plan
@@ -3356,7 +3356,7 @@ jobs:
         run: rm -rf -- delivery-artifacts "$AZURE_CONFIG_DIR"
 
       - name: Download source, image, and reviewed application plan
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern:
             production-{release-source,image-evidence,application-plan}-${{ github.run_id }}-${{
@@ -3488,7 +3488,7 @@ jobs:
           echo "STATE_DIR=$state_dir" >> "$GITHUB_ENV"
 
       - name: Log in with the infrastructure deployment federated identity
-        uses: Azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        uses: Azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
         with:
           client-id: ${{ vars.AZURE_INFRA_DEPLOY_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
@@ -3717,7 +3717,7 @@ jobs:
             rollback-forged.headers
 
       - name: Download release, image, migration, and application evidence
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern:
             production-{release-source,image-evidence,migration-evidence,application-plan}-${{
@@ -3845,7 +3845,7 @@ jobs:
 
       - name: Log in with the migration/runtime federated identity
         id: runtime_login
-        uses: Azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        uses: Azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
         with:
           client-id: ${{ vars.AZURE_MIGRATION_RUNTIME_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
@@ -4572,7 +4572,7 @@ jobs:
           trap - EXIT
 
       - name: Upload successful rollout evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: production-rollout-evidence-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
