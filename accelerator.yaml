@@ -44,8 +44,8 @@ demo:
   customer_data_required: false
   sample_data_required: false
   script: README.md#demo-experience
-  recording_url: null
-  recording_status: Pending reviewed five-minute captioned capture
+  recording_url: docs/accelerator/demo.html
+  recording_status: Captured locally with captions; independent release review pending
   screenshots:
     - docs/accelerator/home-light.png
     - docs/accelerator/home-dark.png

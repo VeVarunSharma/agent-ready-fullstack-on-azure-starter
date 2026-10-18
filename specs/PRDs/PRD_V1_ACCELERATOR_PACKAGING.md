@@ -4,7 +4,7 @@ version: "1"
 path: "specs/PRDs/PRD_V1_ACCELERATOR_PACKAGING.md"
 title: "Local foundation accelerator packaging"
 summary: "Package local demo assets without changing runtime behavior."
-lifecycle: "active"
+lifecycle: "current"
 owners: ["@VeVarunSharma"]
 created: "2026-10-18"
 updated: "2026-10-18"
@@ -63,11 +63,11 @@ explicit. No new testing or media dependencies are required.
 
 ## Acceptance Criteria
 
-- [ ] **AC-001**: README includes story, journey, both timed demos, reset/fallback, reuse,
+- [x] **AC-001**: README includes story, journey, both timed demos, reset/fallback, reuse,
       engagement, support, troubleshooting, and a concrete readiness checklist.
-- [ ] **AC-002**: Metadata and diagrams distinguish local implementation from disabled Azure
+- [x] **AC-002**: Metadata and diagrams distinguish local implementation from disabled Azure
       scaffolding; catalog-schema and owner approval are not asserted.
-- [ ] **AC-003**: Evidence identifies source commit, runtime/database mode, commands and outcomes;
+- [x] **AC-003**: Evidence identifies source commit, runtime/database mode, commands and outcomes;
       media is real local capture or explicitly marked unavailable.
 
 ## Migration and Configuration
@@ -86,7 +86,7 @@ unknown paths under the repository's fail-closed path classification; it does no
 
 ## Status
 
-Lifecycle: **active**
+Lifecycle: **current**
 
 Packaging work only. Completion of this PRD does not confer catalog acceptance or production
 authorization. Outstanding external readiness gates remain in README and verification evidence.

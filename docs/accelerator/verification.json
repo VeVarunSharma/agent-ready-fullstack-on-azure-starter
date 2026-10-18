@@ -6,6 +6,7 @@
     "os": "Linux x64 sandbox",
     "node": "24.18.0",
     "pnpm": "11.17.0",
+    "bicep": "0.45.15; official CLI installed at ignored infra/.tools/bicep for existing preflight tests",
     "dependencies": "Frozen lockfile; no manifest or lockfile changes",
     "runtime_mode": "local",
     "database_mode": "local-password",
@@ -55,7 +56,7 @@
     {
       "command": "pnpm e2e",
       "result": "blocked",
-      "detail": "Existing fixed port 3100 is occupied by an external listener returning HTTP 403. Playwright refused to reuse it; no existing tests or port configuration were changed. No browser/accessibility suite pass is claimed."
+      "detail": "Existing fixed port 3100 is occupied by an external listener returning HTTP 403. Playwright refused to reuse it; no existing tests or port configuration were changed. No local browser/accessibility suite pass is claimed; historical hosted source-baseline evidence is listed separately."
     },
     {
       "command": "pnpm spec:validate --base 39bf915447e94692b7b36826bc9d6557665130af",
@@ -64,11 +65,12 @@
     },
     {
       "command": "SPEC_BASE_REF=39bf915447e94692b7b36826bc9d6557665130af pnpm check",
-      "result": "pending"
+      "result": "passed",
+      "detail": "Pinned Node/pnpm and Bicep 0.45.15 selected; all aggregate stages passed, including 12 Bicep templates, 2 parameter files, and offline preflight tests. Azure was not accessed."
     },
     {
       "command": "pnpm docker:build",
-      "result": "pending"
+      "result": "passed"
     }
   ],
   "observed_http": [
@@ -89,6 +91,20 @@
       "http_status": 200,
       "body_fields": { "status": "ok", "apiVersion": "v1" },
       "meaning": "Contract health pipeline, not database or business transaction"
+    },
+    {
+      "path": "/health/ready",
+      "scenario": "docker compose stop postgres",
+      "http_status": 503,
+      "body_fields": { "status": "not_ready" },
+      "meaning": "Local database outage is detected; liveness stayed HTTP 200"
+    },
+    {
+      "path": "/health/ready",
+      "scenario": "docker compose up -d --wait after outage",
+      "http_status": 200,
+      "body_fields": { "status": "ready" },
+      "meaning": "Readiness recovers after local PostgreSQL restart"
     }
   ],
   "media": {
@@ -96,9 +112,15 @@
     "capture": "Real local Next.js development runtime; clean Playwright Chromium context",
     "viewport": { "width": 1280, "height": 720 },
     "screenshots_full_page": true,
-    "video": null,
+    "video": "foundation-demo.webm",
     "captions": "foundation-demo.vtt",
-    "video_status": "Capture in progress; publisher review not complete",
+    "player": "demo.html",
+    "video_status": "Captured and playback checked; independent publisher review not complete",
+    "duration_seconds": 300,
+    "caption_cues": 17,
+    "audio": "None; English narrative captions and README script provide text alternatives",
+    "processing": "Browser startup removed using existing Playwright FFmpeg; encoded at 10 fps, 1280x720. Application/diagrams were not altered for the capture.",
+    "playback_check": "Chromium loaded metadata and all 17 cues, and decoded seeks at 1, 46, 76, 106, 126, 146, 166, 211, 256, and 299 seconds.",
     "privacy": "Only neutral application, local health responses, repository diagrams and workshop page are intended. No customer data or environment credentials displayed.",
     "independent_publisher_review": false
   },
@@ -121,6 +143,28 @@
       "action": "Do not treat unrelated historical runs as release evidence; this packaging change has a generated cataloged PRD"
     }
   ],
+  "hosted_baseline_runs": {
+    "source_commit": "39bf915447e94692b7b36826bc9d6557665130af",
+    "scope": "Historical GitHub workflow conclusions inspected through API; not release checks for this packaging change",
+    "integration": {
+      "result": "success",
+      "url": "https://github.com/VeVarunSharma/agent-ready-fullstack-on-azure-starter/actions/runs/30333339244"
+    },
+    "browser_accessibility": {
+      "result": "success",
+      "url": "https://github.com/VeVarunSharma/agent-ready-fullstack-on-azure-starter/actions/runs/30333339224"
+    },
+    "infrastructure_offline": {
+      "result": "success",
+      "url": "https://github.com/VeVarunSharma/agent-ready-fullstack-on-azure-starter/actions/runs/30333339236"
+    },
+    "ci": {
+      "result": "failure",
+      "url": "https://github.com/VeVarunSharma/agent-ready-fullstack-on-azure-starter/actions/runs/30333339194",
+      "log_finding": "Specification gate: base reference origin/ is not a commit; downstream Docker job did not establish a passing build",
+      "action": "Require valid baseline context and successful hosted release checks; local validation uses an explicit baseline without weakening policy"
+    }
+  },
   "open_release_gates": [
     "Independent clean-machine setup and unaided presenter reproduction",
     "Reviewed captioned recording and complete release asset privacy review",
@@ -130,5 +174,12 @@
     "Authoritative catalog schema validation and submission review",
     "License and media reuse review"
   ],
+  "change_review": {
+    "parallel_validation": "Invoked; automated review unavailable because configured model was missing. CodeQL skipped documentation-only changes as trivial.",
+    "read_only_specialist_review": "Completed against source baseline; no significant issues found.",
+    "static_assets": "README local file targets and SVG title/description XML checked; video metadata, captions, and milestone decoding checked through existing Playwright Chromium.",
+    "copilot_guidance": "Reviewed .github/copilot-instructions.md against current package boundaries, pinned tooling and local-only scope; no instruction changes needed.",
+    "secret_scan": "Pre-commit scanning performed through the provided scanning tool; independent release asset privacy review remains open."
+  },
   "readiness": "Demo package prepared; not field-ready, catalog-accepted, or production authorized"
 }

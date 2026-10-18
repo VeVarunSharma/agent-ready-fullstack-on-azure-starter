@@ -113,6 +113,9 @@ In each repository created from the template:
 - pnpm `11.17.0`
 - Git
 - Docker with Compose v2 for local PostgreSQL/integration/image checks
+- Bicep `0.45.15` for offline infrastructure checks included in `pnpm check`. Install the official
+  executable at the ignored `infra/.tools/bicep` path, which the existing preflight tests require,
+  and set `BICEP_CLI` to that executable if another version is on `PATH`. No Azure login is needed.
 
 ## Local quickstart
 
@@ -241,7 +244,7 @@ external model call.
 | [`infra`](infra/)                                           | Offline-compiled Bicep, synthetic/incomplete inputs, fail-closed preflight |
 | [`.github/workflows`](.github/workflows/)                   | Deterministic CI plus guarded, unexecuted Azure plan/deploy candidates     |
 | [`.copilot/skills`](.copilot/skills/)                       | Repository-local agent skills                                              |
-| [`specs`](specs/)                                           | Empty product PRD catalog, templates/tooling, design contract              |
+| [`specs`](specs/)                                           | Governed PRD catalog, templates/tooling, design contract                   |
 | [`docs`](docs/)                                             | ADRs, security/residency records, readiness and operator runbooks          |
 | [`Dockerfile`](Dockerfile)                                  | Root-context standalone non-root production-shaped image                   |
 | [`compose.yaml`](compose.yaml)                              | Local-only PostgreSQL 18 service and persistent development volume         |
@@ -339,12 +342,24 @@ isolated VNet-connected runner are external controls that this repository does n
 
 ![Dark-mode local foundation showing the same neutral content](docs/accelerator/home-dark.png)
 
-| Asset                                                       | Use                                                                               |
-| ----------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| [Local runtime diagram](docs/accelerator/local-runtime.svg) | Implemented local paths and boundaries; not a deployment diagram                  |
-| [Azure target diagram](docs/accelerator/azure-target.svg)   | Disabled target topology, not active controls                                     |
-| [Verification record](docs/accelerator/verification.json)   | Commit, environment, database mode, checks, media provenance and open gates       |
-| Recording                                                   | Pending a reviewed five-minute captioned recording; no completed video is claimed |
+| Asset                                                       | Use                                                                                                    |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| [Local runtime diagram](docs/accelerator/local-runtime.svg) | Implemented local paths and boundaries; not a deployment diagram                                       |
+| [Azure target diagram](docs/accelerator/azure-target.svg)   | Disabled target topology, not active controls                                                          |
+| [Verification record](docs/accelerator/verification.json)   | Commit, environment, database mode, checks, media provenance and open gates                            |
+| [Captioned local recording](docs/accelerator/demo.html)     | Five-minute silent browser capture with English narrative captions; independent release review pending |
+
+To play locally, keep the asset folder together and open `docs/accelerator/demo.html`. If the
+browser blocks captions on local files, optionally use Python 3's standard-library server from the
+repository root:
+
+```sh
+python3 -m http.server 3200 --bind 127.0.0.1 --directory docs/accelerator
+```
+
+Open <http://127.0.0.1:3200/demo.html>, expand the player, and enable English captions. This serves
+only the static asset folder on loopback; stop it with `Ctrl-C`. Never serve the repository root or
+ignored local configuration. The README remains the full text alternative.
 
 **Recording recipe:** Record the five-minute script at 1280×720 or higher in a clean browser
 profile. Include all three health requests, explicitly identify enabled database mode, and show both
@@ -356,8 +371,8 @@ for a runnable demo.
 
 **Fallback:** If the runtime fails, use the checked-in screenshots, diagrams, and dated evidence.
 Say “These are previously captured local assets, not a live run.” The script is also a text
-alternative while the recording is pending. Never call fallback images or database-disabled tests
-live database evidence.
+alternative for the silent recording. Never call fallback images or database-disabled tests live
+database evidence.
 
 **Reset:** Stop the app, run `docker compose down`, and clear the site's theme preference/browser
 data to restore system theme. The quickstart's volume-removal command is destructive to local
@@ -489,6 +504,8 @@ third-party additions.
 - [x] Add labeled architecture diagrams, timed scripts, preflight, reset, and fallback.
 - [x] State that no business sample data is required.
 - [x] Capture real local light/dark screenshots and record provenance.
+- [x] Capture a five-minute local recording with synchronized narrative captions and verify
+      playback.
 - [ ] Publish a reviewed, captioned five-minute recording.
 - [ ] Have a second SE/CSA independently reproduce setup and present without author help.
 - [ ] Close applicable failed/blocked checks and retain results for the release commit.
@@ -499,8 +516,8 @@ third-party additions.
 - [ ] Confirm private vulnerability reporting, maintainer, support route, and reuse rights.
 - [ ] Verify actual quality/build, integration, browser, Docker, IaC, and CodeQL runs for the
       release.
-- [ ] Review existing Copilot guidance against setup and current scope; no guidance changes are
-      implied.
+- [x] Review existing Copilot guidance against setup and current scope; no instruction changes
+      needed.
 - [ ] Validate [accelerator.yaml](accelerator.yaml) against the catalog's actual submission schema.
 - [ ] Publish a reviewed version with demo, evidence, support, and adaptation links.
 
