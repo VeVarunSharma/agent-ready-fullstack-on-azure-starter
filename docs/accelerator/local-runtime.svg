@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="540" viewBox="0 0 1120 540" role="img" aria-labelledby="title desc">
+  <title id="title">Implemented local application foundation</title>
+  <desc id="desc">An untrusted local browser crosses the HTTP boundary into Next.js. Shared API contracts, UI and environment packages run in process. The server probes loopback-bound local PostgreSQL when enabled. No product tables, customer data or Azure resources are present.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#17324d"/></marker>
+  </defs>
+  <rect width="1120" height="540" fill="#f5f8fc"/>
+  <g font-family="sans-serif" fill="#17324d">
+    <text x="40" y="48" font-size="26" font-weight="bold">LOCAL RUNTIME — IMPLEMENTED</text>
+    <text x="40" y="78" font-size="17">Development foundation only • No product workflow, authorization policy or live AI</text>
+    <rect x="40" y="180" width="190" height="130" rx="12" fill="#ffffff" stroke="#17324d" stroke-width="2"/>
+    <text x="60" y="218" font-size="20" font-weight="bold">Local browser</text>
+    <text x="60" y="250" font-size="16">Untrusted input</text>
+    <text x="60" y="278" font-size="16">Theme preference</text>
+    <path d="M250 125 V430" stroke="#6b3346" stroke-width="2" stroke-dasharray="8 6"/>
+    <text x="266" y="143" font-size="15">HTTP trust boundary</text>
+    <path d="M231 245 H350" stroke="#17324d" stroke-width="2" marker-end="url(#arrow)"/>
+    <rect x="355" y="180" width="320" height="130" rx="12" fill="#ffffff" stroke="#17324d" stroke-width="2"/>
+    <text x="375" y="218" font-size="20" font-weight="bold">Next.js server</text>
+    <text x="375" y="250" font-size="16">Neutral shell + typed health API</text>
+    <text x="375" y="278" font-size="16">Configuration + readiness probe</text>
+    <path d="M515 311 V355" stroke="#17324d" stroke-width="2" marker-end="url(#arrow)"/>
+    <rect x="355" y="360" width="320" height="72" rx="12" fill="#e5eef9" stroke="#17324d"/>
+    <text x="375" y="389" font-size="17">Shared contracts / UI / env / db</text>
+    <text x="375" y="415" font-size="15">In-process packages, not services</text>
+    <path d="M710 160 V435" stroke="#6b3346" stroke-width="2" stroke-dasharray="8 6"/>
+    <path d="M676 245 H795" stroke="#17324d" stroke-width="2" marker-end="url(#arrow)"/>
+    <text x="737" y="223" font-size="15">pg</text>
+    <rect x="800" y="180" width="280" height="130" rx="12" fill="#ffffff" stroke="#17324d" stroke-width="2"/>
+    <text x="820" y="218" font-size="20" font-weight="bold">Local PostgreSQL 18</text>
+    <text x="820" y="250" font-size="16">127.0.0.1 • Compose</text>
+    <text x="820" y="278" font-size="16">Empty product schema</text>
+    <text x="40" y="480" font-size="17">Solid arrows: implemented paths. Dashed lines: HTTP and database boundaries.</text>
+    <text x="40" y="510" font-size="17">Readiness probes PostgreSQL only when database mode is enabled. No Azure calls.</text>
+  </g>
+</svg>

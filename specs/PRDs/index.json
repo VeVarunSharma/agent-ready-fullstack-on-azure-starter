@@ -1,5 +1,23 @@
 {
   "$schema": "../catalog.schema.json",
   "schemaVersion": 1,
-  "entries": []
+  "entries": [
+    {
+      "id": "ACCELERATOR_PACKAGING",
+      "version": "1",
+      "path": "specs/PRDs/PRD_V1_ACCELERATOR_PACKAGING.md",
+      "title": "Local foundation accelerator packaging",
+      "summary": "Package local demo assets and verify CI without changing runtime behavior.",
+      "lifecycle": "current",
+      "owners": ["@VeVarunSharma"],
+      "created": "2026-10-18",
+      "updated": "2026-10-18",
+      "dataClassification": "Public",
+      "supersededBy": null,
+      "architectureImpact": false,
+      "designSystemImpact": false,
+      "sensitiveDataImpact": false,
+      "persistenceImpact": false
+    }
+  ]
 }

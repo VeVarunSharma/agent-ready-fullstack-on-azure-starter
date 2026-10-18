@@ -38,9 +38,7 @@ function main(): void {
     const options = parseArguments(process.argv.slice(2));
     const environmentBase =
       process.env.SPEC_BASE_REF ??
-      (process.env.GITHUB_BASE_REF === undefined
-        ? undefined
-        : `origin/${process.env.GITHUB_BASE_REF}`);
+      (process.env.GITHUB_BASE_REF ? `origin/${process.env.GITHUB_BASE_REF}` : undefined);
     const git = loadGitContext(process.cwd(), options.base ?? environmentBase);
     const issues = [...git.issues];
 

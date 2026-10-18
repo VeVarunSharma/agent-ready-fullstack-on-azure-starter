@@ -1,0 +1,69 @@
+WEBVTT
+
+00:00.000 --> 00:15.000
+Platform teams often repeat application setup and discover identity,
+networking, and operational decisions late.
+
+00:15.000 --> 00:30.000
+This foundation offers a consistent local starting point:
+typed APIs, reusable UI, database tooling, and specification-led changes.
+
+00:30.000 --> 00:45.000
+This is a real local browser capture, not a customer application.
+There is no live AI agent or deployed Azure environment.
+
+00:45.000 --> 01:00.000
+We select light theme on the existing neutral homepage.
+Shared primitives use semantic design tokens.
+
+01:00.000 --> 01:15.000
+Keyboard navigation is part of presenter review.
+Automated accessibility checks do not replace assistive-technology testing.
+
+01:15.000 --> 01:30.000
+We select dark theme. The content and scope remain unchanged.
+No product navigation, roles, permissions, or application data are defined.
+
+01:30.000 --> 01:45.000
+The reusable value is the foundation and its explicit boundaries,
+not an invented business workflow.
+
+01:45.000 --> 02:05.000
+The liveness route returns status live.
+This proves process responsiveness, not database connectivity.
+
+02:05.000 --> 02:25.000
+Readiness returns status ready. This capture runs with
+DATABASE_MODE=local-password and local PostgreSQL enabled.
+
+02:25.000 --> 02:45.000
+The versioned health API returns status ok and apiVersion v1.
+It exercises the contract pipeline, not a product transaction.
+
+02:45.000 --> 03:05.000
+The implemented local diagram shows the browser crossing
+the HTTP boundary into Next.js and its in-process packages.
+
+03:05.000 --> 03:30.000
+Local PostgreSQL is loopback-bound with no product tables.
+Database-disabled readiness would not establish database connectivity.
+
+03:30.000 --> 03:50.000
+The Azure diagram is a scaffolded-disabled TARGET, not deployment evidence.
+Dashed paths do not represent active controls.
+
+03:50.000 --> 04:15.000
+Identity, networking, residency, monitoring, and recovery decisions remain open.
+Foundry is false-only; application trace export is disabled.
+
+04:15.000 --> 04:35.000
+Bring one application request and your platform/security owners.
+The workshop produces an adoption decision and scoped implementation backlog.
+
+04:35.000 --> 04:50.000
+A pilot needs a governed PRD and measurable acceptance criteria.
+Any Azure operation requires separate, explicit authorization.
+
+04:50.000 --> 05:00.000
+This gives your team a consistent starting point and exposes
+decisions still required before deployment. Readiness gates remain open.

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Local foundation demonstration</title>
+  </head>
+  <body>
+    <main>
+      <h1>Application Foundation Adoption Workshop</h1>
+      <p>
+        A reusable local starting point for platform engineers, developers, SEs, and CSAs. This is
+        not a finished product, live AI agent, or deployed Azure environment.
+      </p>
+      <h2>Bring one application request</h2>
+      <p>
+        Bring your platform and security owners. Leave with an adoption decision, architecture
+        delta, blocker register, and scoped implementation backlog.
+      </p>
+      <h2>Decisions before deployment</h2>
+      <ul>
+        <li>Identity audience, authorization, data classification, and residency.</li>
+        <li>Private networking, operational ownership, retention, and recovery.</li>
+        <li>
+          Approved first-capability PRD, measurable acceptance criteria, and pilot authorization.
+        </li>
+      </ul>
+      <h2>Five-minute local recording</h2>
+      <p>
+        Caption-led, silent browser capture. Enable captions in the player. Only the existing local
+        runtime and static repository diagrams are shown; no Azure calls occur. Readiness in this
+        capture uses enabled local-password database mode. This is recorded evidence, not a live
+        run.
+      </p>
+      <details>
+        <summary>Open the captioned recording</summary>
+        <video
+          controls
+          preload="metadata"
+          width="960"
+          aria-label="Five-minute local foundation demo"
+        >
+          <source src="foundation-demo.webm" type="video/webm" />
+          <track
+            kind="captions"
+            src="foundation-demo.vtt"
+            srclang="en"
+            label="English narrative and actions"
+            default
+          />
+          Your browser cannot play this recording; use the presenter script linked below.
+        </video>
+      </details>
+      <p>
+        If captions do not load from a local file, serve only this asset folder over an approved
+        loopback-only static HTTP server or read the linked captions and script. Do not expose the
+        repository, ignored configuration, or a local server publicly. The README link requires the
+        repository checkout or repository host.
+      </p>
+      <nav aria-label="Demo references">
+        <ul>
+          <li>
+            <a href="../../README.md#demo-experience">Presenter script and text alternative</a>
+          </li>
+          <li><a href="foundation-demo.vtt">Timed narrative captions</a></li>
+          <li><a href="local-runtime.svg">Implemented local runtime</a></li>
+          <li><a href="azure-target.svg">Scaffolded-disabled Azure target</a></li>
+          <li><a href="verification.json">Capture provenance and verification limits</a></li>
+        </ul>
+      </nav>
+      <p>
+        Readiness gates remain open: independent reproduction, accountable maintainer, support
+        confirmation, release checks, and authoritative catalog-schema validation.
+      </p>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,78 @@
+# Provisional authoring metadata only: catalog schema access is unresolved.
+# Not consumed by the application, Azure tooling, or deployment workflows.
+name: Agent-ready Full-stack on Azure Starter
+summary: >-
+  A product-neutral application foundation for platform teams evaluating consistent local
+  development, typed APIs, accessible UI primitives, specification-led delivery, and future Azure
+  deployment patterns.
+repository: https://github.com/VeVarunSharma/agent-ready-fullstack-on-azure-starter
+license: MIT
+customer_scope: Reusable / cross-industry
+scope_confirmed: false
+industries:
+  - Cross-industry
+personas:
+  - Platform engineer
+  - Developer
+  - Solution engineer
+  - Cloud solution architect
+readiness:
+  current: Demo package prepared; readiness gates open
+  target: Catalog-ready
+  catalog_acceptance_verified: false
+  schema_compatibility_verified: false
+capabilities:
+  implemented_locally:
+    - Neutral Next.js application shell
+    - Accessible semantic UI primitives
+    - Typed oRPC health API
+    - Environment validation
+    - PostgreSQL tooling with an empty product schema
+    - Specification-led change governance
+  scaffolded_disabled:
+    - Azure infrastructure topology
+    - Hosted authentication configuration
+    - Azure monitoring integrations
+  not_provided:
+    - Customer business workflow
+    - Product authorization policy
+    - Live AI model or agent
+    - Verified Azure deployment
+demo:
+  mode: Local
+  azure_credentials_required: false
+  customer_data_required: false
+  sample_data_required: false
+  script: README.md#demo-experience
+  recording_url: docs/accelerator/demo.html
+  recording_status: Captured locally with captions; independent release review pending
+  screenshots:
+    - docs/accelerator/home-light.png
+    - docs/accelerator/home-dark.png
+  architecture:
+    - docs/accelerator/local-runtime.svg
+    - docs/accelerator/azure-target.svg
+engagement:
+  offer: Application Foundation Adoption Workshop
+  outcome: Adoption decision and scoped implementation backlog
+  guide: README.md#customer-engagement
+ownership:
+  maintainer: null
+  support_route: null
+  confirmation_required: true
+  support_policy: Best effort; no SLA or production support window
+evidence:
+  record: docs/accelerator/verification.json
+  independent_setup_verified: false
+  release_validation_results_url: null
+catalog:
+  requested_repository: https://github.com/mcaps-microsoft/accelerators-catalog
+  access_checked: "2026-10-18"
+  access_result: GitHub API 404; authoritative schema not verified
+  submitted: false
+limitations:
+  - Not production configured or authorized
+  - Foundry is false-only and nondeployable
+  - Azure deployment requires separate authorization
+  - Production identity, network, residency, and recovery decisions remain open
+  - Independent presenter, recording, ownership, and release verification gates remain open
