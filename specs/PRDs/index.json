@@ -7,7 +7,7 @@
       "version": "1",
       "path": "specs/PRDs/PRD_V1_ACCELERATOR_PACKAGING.md",
       "title": "Local foundation accelerator packaging",
-      "summary": "Package local demo assets without changing runtime behavior.",
+      "summary": "Package local demo assets and verify CI without changing runtime behavior.",
       "lifecycle": "current",
       "owners": ["@VeVarunSharma"],
       "created": "2026-10-18",

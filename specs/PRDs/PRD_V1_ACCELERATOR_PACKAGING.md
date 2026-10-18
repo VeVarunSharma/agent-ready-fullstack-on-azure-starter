@@ -3,7 +3,7 @@ id: "ACCELERATOR_PACKAGING"
 version: "1"
 path: "specs/PRDs/PRD_V1_ACCELERATOR_PACKAGING.md"
 title: "Local foundation accelerator packaging"
-summary: "Package local demo assets without changing runtime behavior."
+summary: "Package local demo assets and verify CI without changing runtime behavior."
 lifecycle: "current"
 owners: ["@VeVarunSharma"]
 created: "2026-10-18"
@@ -35,6 +35,7 @@ customer solution, live agent, or deployed Azure environment.
 - Draft `accelerator.yaml`, explicitly not consumed by runtime or deployment.
 - Static local/target architecture diagrams, real local screenshots and available recording assets.
 - Commit-bound verification evidence, including blocked or failed checks and external prerequisites.
+- Restore specification validation on push events without changing PR or explicit-base behavior.
 
 ## Out of Scope
 
@@ -53,6 +54,12 @@ Metadata and evidence must expose unresolved prerequisites rather than promote r
 may be withheld if capture is unavailable; its status and reproducible capture steps must then be
 explicit. No new testing or media dependencies are required.
 
+### FS-002: Push-compatible specification validation
+
+Treat an empty `GITHUB_BASE_REF` as absent so push events use the existing Git baseline fallback.
+Preserve nonempty PR base references and precedence of `--base` over `SPEC_BASE_REF` over the PR
+base.
+
 ## Affected Files
 
 - `README.md` — self-contained adoption and presenter guide.
@@ -60,6 +67,8 @@ explicit. No new testing or media dependencies are required.
 - `docs/accelerator/*` — static diagrams, screenshots, captions/recording when available, evidence.
 - `specs/PRDs/index.json` — generated packaging specification catalog entry.
 - `specs/PRDs/PRD_V1_ACCELERATOR_PACKAGING.md` — scope and acceptance evidence.
+- `scripts/specs/validate.ts` and `scripts/specs/validate.test.ts` — CI baseline resolution and
+  tests.
 
 ## Acceptance Criteria
 
@@ -69,6 +78,8 @@ explicit. No new testing or media dependencies are required.
       scaffolding; catalog-schema and owner approval are not asserted.
 - [x] **AC-003**: Evidence identifies source commit, runtime/database mode, commands and outcomes;
       media is real local capture or explicitly marked unavailable.
+- [x] **AC-004**: Specification validation handles absent, empty, and nonempty PR base references
+      while preserving explicit-base precedence.
 
 ## Migration and Configuration
 
@@ -78,11 +89,12 @@ unknown paths under the repository's fail-closed path classification; it does no
 
 ## Verification
 
-| Criterion | Method | Evidence                                                                                                                          |
-| --------- | ------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| AC-001    | manual | Read the README sections and follow its presenter preflight and reset.                                                            |
-| AC-002    | manual | Compare `accelerator.yaml` and `docs/accelerator/*.svg` against `ARCHITECTURE.md`; verify catalog access and gate labels.         |
-| AC-003    | manual | Review `docs/accelerator/verification.json`, reproduce its commands, and inspect every linked media asset for local-only content. |
+| Criterion | Method    | Evidence                                                                                                                                |
+| --------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| AC-001    | manual    | Read the README sections and follow its presenter preflight and reset.                                                                  |
+| AC-002    | manual    | Compare `accelerator.yaml` and `docs/accelerator/*.svg` against `ARCHITECTURE.md`; verify catalog access and gate labels.               |
+| AC-003    | manual    | Review `docs/accelerator/verification.json`, reproduce its commands, and inspect every linked media asset for local-only content.       |
+| AC-004    | automated | `scripts/specs/validate.test.ts`; run `pnpm exec vitest run --config vitest.config.ts` and `GITHUB_BASE_REF='' pnpm spec:validate:all`. |
 
 ## Status
 
