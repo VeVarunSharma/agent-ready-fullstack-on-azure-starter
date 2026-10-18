@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">Azure target topology — scaffolded-disabled, not deployed</title>
+  <desc id="desc">The target has an Application Gateway WAF before internal Container Apps and private PostgreSQL, ACR, Key Vault and regional Log Analytics dependencies. Separate delivery identities and a migration job are planned deployment boundaries. All Azure paths are disabled and unverified. Foundry is absent and application trace export is disabled.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#17324d"/></marker>
+  </defs>
+  <rect width="1120" height="620" fill="#f5f8fc"/>
+  <g font-family="sans-serif" fill="#17324d">
+    <text x="40" y="48" font-size="26" font-weight="bold">AZURE TARGET — SCAFFOLDED-DISABLED</text>
+    <text x="40" y="78" font-size="18">NOT DEPLOYED • No active controls or residency claim • Separate authorization required</text>
+    <rect x="315" y="115" width="765" height="395" rx="14" fill="#e5eef9" stroke="#6b3346" stroke-width="2" stroke-dasharray="8 6"/>
+    <text x="335" y="144" font-size="17">Target private regional boundary — inputs and approvals unresolved</text>
+    <rect x="40" y="190" width="210" height="95" rx="12" fill="#ffffff" stroke="#17324d"/>
+    <text x="60" y="225" font-size="19" font-weight="bold">Application Gateway</text>
+    <text x="60" y="254" font-size="16">Public WAF / TLS edge</text>
+    <path d="M251 237 H350" stroke="#17324d" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+    <rect x="355" y="190" width="285" height="95" rx="12" fill="#ffffff" stroke="#17324d"/>
+    <text x="375" y="225" font-size="20" font-weight="bold">Internal Container Apps</text>
+    <text x="375" y="254" font-size="16">Auth + managed identities</text>
+    <path d="M641 237 H730" stroke="#17324d" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+    <rect x="735" y="180" width="310" height="135" rx="12" fill="#ffffff" stroke="#17324d"/>
+    <text x="755" y="211" font-size="20" font-weight="bold">Private dependencies</text>
+    <text x="755" y="241" font-size="16">PostgreSQL • ACR • Key Vault</text>
+    <text x="755" y="270" font-size="16">Regional Log Analytics routing</text>
+    <text x="755" y="297" font-size="15">Private DNS / endpoints / egress</text>
+    <rect x="355" y="355" width="285" height="115" rx="12" fill="#ffffff" stroke="#17324d"/>
+    <text x="375" y="390" font-size="19" font-weight="bold">Separate migration job</text>
+    <text x="375" y="419" font-size="16">Own identity and SQL grants</text>
+    <text x="375" y="447" font-size="16">Never application startup</text>
+    <path d="M641 400 H700 V305 H730" stroke="#17324d" stroke-width="2" stroke-dasharray="6 5" fill="none" marker-end="url(#arrow)"/>
+    <text x="40" y="345" font-size="17">External prerequisites:</text>
+    <text x="40" y="376" font-size="16">Approved identity audience</text>
+    <text x="40" y="403" font-size="16">Four delivery OIDC identities</text>
+    <text x="40" y="430" font-size="16">Protected private runner</text>
+    <text x="40" y="457" font-size="16">Region / retention / recovery</text>
+    <text x="40" y="549" font-size="17">Dashed arrows: target paths only; diagram does not establish deployment or trust.</text>
+    <text x="40" y="579" font-size="17">Foundry: false-only, no resources. Application Insights / AMPLS: disabled; no app trace export.</text>
+  </g>
+</svg>

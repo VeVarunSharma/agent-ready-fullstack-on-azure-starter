@@ -1,0 +1,134 @@
+{
+  "recorded_on": "2026-10-18",
+  "application_source_commit": "39bf915447e94692b7b36826bc9d6557665130af",
+  "scope": "Existing application at source commit; packaging assets added in this change. This record is not release approval.",
+  "environment": {
+    "os": "Linux x64 sandbox",
+    "node": "24.18.0",
+    "pnpm": "11.17.0",
+    "dependencies": "Frozen lockfile; no manifest or lockfile changes",
+    "runtime_mode": "local",
+    "database_mode": "local-password",
+    "database": "Compose PostgreSQL 18, loopback only, empty product schema",
+    "authentication": "disabled in explicit local mode only",
+    "telemetry": "disabled",
+    "azure_operations": "none",
+    "customer_data": "none"
+  },
+  "checks": [
+    {
+      "command": "pnpm install --frozen-lockfile --strict-peer-dependencies",
+      "result": "passed"
+    },
+    {
+      "command": "pnpm lint",
+      "result": "passed",
+      "detail": "No warnings"
+    },
+    {
+      "command": "pnpm typecheck",
+      "result": "passed"
+    },
+    {
+      "command": "pnpm test:unit",
+      "result": "passed",
+      "tests": 199
+    },
+    {
+      "command": "pnpm build",
+      "result": "passed"
+    },
+    {
+      "command": "docker compose up -d --wait",
+      "result": "passed"
+    },
+    {
+      "command": "pnpm db:migrate:local",
+      "result": "passed",
+      "detail": "Explicit local configuration from README; no product schema introduced"
+    },
+    {
+      "command": "pnpm test:integration",
+      "result": "passed",
+      "tests": 2
+    },
+    {
+      "command": "pnpm e2e",
+      "result": "blocked",
+      "detail": "Existing fixed port 3100 is occupied by an external listener returning HTTP 403. Playwright refused to reuse it; no existing tests or port configuration were changed. No browser/accessibility suite pass is claimed."
+    },
+    {
+      "command": "pnpm spec:validate --base 39bf915447e94692b7b36826bc9d6557665130af",
+      "result": "passed",
+      "detail": "Default sandbox base resolved to invalid origin/; explicit real baseline preserves Git policy enforcement."
+    },
+    {
+      "command": "SPEC_BASE_REF=39bf915447e94692b7b36826bc9d6557665130af pnpm check",
+      "result": "pending"
+    },
+    {
+      "command": "pnpm docker:build",
+      "result": "pending"
+    }
+  ],
+  "observed_http": [
+    {
+      "path": "/health/live",
+      "http_status": 200,
+      "body_fields": { "status": "live" },
+      "meaning": "Process liveness only"
+    },
+    {
+      "path": "/health/ready",
+      "http_status": 200,
+      "body_fields": { "status": "ready" },
+      "meaning": "Configuration valid and local PostgreSQL probe succeeded with database enabled"
+    },
+    {
+      "path": "/api/v1/health",
+      "http_status": 200,
+      "body_fields": { "status": "ok", "apiVersion": "v1" },
+      "meaning": "Contract health pipeline, not database or business transaction"
+    }
+  ],
+  "media": {
+    "screenshots": ["home-light.png", "home-dark.png"],
+    "capture": "Real local Next.js development runtime; clean Playwright Chromium context",
+    "viewport": { "width": 1280, "height": 720 },
+    "screenshots_full_page": true,
+    "video": null,
+    "captions": "foundation-demo.vtt",
+    "video_status": "Capture in progress; publisher review not complete",
+    "privacy": "Only neutral application, local health responses, repository diagrams and workshop page are intended. No customer data or environment credentials displayed.",
+    "independent_publisher_review": false
+  },
+  "external_findings": [
+    {
+      "url": "https://github.com/mcaps-microsoft/accelerators-catalog",
+      "result": "GitHub API returned 404; catalog schema and contribution requirements not verified",
+      "action": "Obtain approved access or correct repository location before validating/submitting metadata"
+    },
+    {
+      "url": "https://github.com/VeVarunSharma/agent-ready-fullstack-on-azure-starter/actions/runs/38208699514",
+      "result": "Historical CodeQL failure on application source commit",
+      "log_finding": "Code scanning is not enabled for this repository",
+      "action": "Repository administrator must confirm appropriate code-scanning settings and successful release run; no repository-settings changes attempted"
+    },
+    {
+      "url": "https://github.com/VeVarunSharma/agent-ready-fullstack-on-azure-starter/actions/runs/33496796533",
+      "result": "Historical CI failure on a different Dependabot commit, not this change",
+      "log_finding": "Specification gate rejected functional changes without a same-change cataloged PRD",
+      "action": "Do not treat unrelated historical runs as release evidence; this packaging change has a generated cataloged PRD"
+    }
+  ],
+  "open_release_gates": [
+    "Independent clean-machine setup and unaided presenter reproduction",
+    "Reviewed captioned recording and complete release asset privacy review",
+    "Browser/accessibility suite in an environment with port 3100 available",
+    "Successful applicable hosted checks for release commit, including repository CodeQL configuration",
+    "Confirmed customer scope, named maintainer, support and private security-reporting routes",
+    "Authoritative catalog schema validation and submission review",
+    "License and media reuse review"
+  ],
+  "readiness": "Demo package prepared; not field-ready, catalog-accepted, or production authorized"
+}
